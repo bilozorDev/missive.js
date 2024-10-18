@@ -1,0 +1,13 @@
+{
+    "devDependencies": {
+        "@tsconfig/node20": "^20.1.4"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "files": [
+        "base.json"
+    ],
+    "name": "tsconfig",
+    "private": true
+}

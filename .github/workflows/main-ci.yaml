@@ -1,0 +1,42 @@
+name: CI
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    build-and-test:
+        name: 🏗️ Build and Test
+        runs-on: ubuntu-latest
+        steps:
+            - name: ⬇️ Checkout repo
+              uses: actions/checkout@v4
+
+            - name: ⎔ Setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+
+            - name: ⎔ Set up pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 9.12.1
+
+            - name: 📥 Download deps
+              run: pnpm install
+
+            - name: 💄 Prettier
+              run: pnpm prettier:check
+
+            - name: 💅 ESLint
+              run: pnpm lint:check
+
+            - name: 🏄 Run the tests
+              run: pnpm test
+
+            - name: 📲 Test the builds
+              run: pnpm build

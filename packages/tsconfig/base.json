@@ -1,0 +1,10 @@
+{
+    "extends": "@tsconfig/node20/tsconfig.json",
+    "display": "missive.js-monorepo",
+    "compilerOptions": {
+        "declaration": true,
+        "module": "ES2022",
+        "moduleResolution": "node",
+        "declarationMap": true
+    }
+}
