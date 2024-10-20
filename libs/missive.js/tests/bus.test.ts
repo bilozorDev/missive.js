@@ -1,7 +1,7 @@
 import { expect, it, beforeEach, describe } from 'vitest';
 import { z, Schema } from 'zod';
 import { Envelope } from '../src/envelope';
-import { createBus, Bus, Middleware } from '../src/bus';
+import { createBus, MissiveBus, Middleware } from '../src/bus';
 
 type MyEvents = {
     event1: { query: { foo: string }; result: { bar: number } };
@@ -9,7 +9,7 @@ type MyEvents = {
 };
 
 describe('Bus', () => {
-    let bus: Bus<'query', MyEvents>;
+    let bus: MissiveBus<'query', MyEvents>;
 
     beforeEach(() => {
         bus = createBus<'query', MyEvents>();
@@ -24,7 +24,7 @@ describe('Bus', () => {
             return { bar: 42 };
         };
 
-        bus.register('event1', schema, handler);
+        bus.registerHandler('event1', schema, handler);
         const intent = bus.createIntent('event1', { foo: 'test' });
         const result = await bus.dispatch(intent);
 
@@ -39,7 +39,7 @@ describe('Bus', () => {
             expect(envelope.message.baz).toBe(true);
             return { qux: 'success' };
         };
-        bus.register('event2', schema, handler);
+        bus.registerHandler('event2', schema, handler);
 
         const intent = bus.createIntent('event2', { baz: true });
         const result = await bus.dispatch(intent);
@@ -61,8 +61,8 @@ describe('Bus', () => {
             await next();
         };
 
-        bus.use(middleware);
-        bus.register('event1', schema, handler);
+        bus.useMiddleware(middleware);
+        bus.registerHandler('event1', schema, handler);
 
         const intent = bus.createIntent('event1', { foo: 'test' });
         const result = await bus.dispatch(intent);
@@ -86,7 +86,7 @@ describe('Bus', () => {
             return { bar: 42 };
         };
 
-        bus.register('event1', schema, handler);
+        bus.registerHandler('event1', schema, handler);
         // @ts-expect-error -- intentionally, we test for the error
         expect(() => bus.createIntent('event1', { foo: 123 })).toThrow();
     });
