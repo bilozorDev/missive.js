@@ -10,7 +10,6 @@ import { createUserCreatedHandler2 } from '../domain/use-cases/user-created2.js'
 import { createUserRemovedHandler, userRemovedEventSchema } from '../domain/use-cases/user-removed.js';
 
 const loggerMiddleware = createLoggerMiddleware();
-
 const queryBus = createQueryBus<QueryHandlerRegistry>();
 queryBus.use(loggerMiddleware);
 queryBus.register('getUser', getUserQuerySchema, createGetUserHandler({}));
