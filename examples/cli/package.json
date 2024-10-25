@@ -1,13 +1,13 @@
 {
     "devDependencies": {
+        "@types/node": "^22.7.9",
         "tsconfig": "workspace:*",
-        "@types/node": "^22.7.7",
         "typescript": "^5.6.3"
     },
     "dependencies": {
-        "zod": "^3.23.8",
         "missive.js": "workspace:*",
-        "missive.js-shared-code-example": "workspace:*"
+        "missive.js-shared-code-example": "workspace:*",
+        "zod": "^3.23.8"
     },
     "engines": {
         "node": ">=20"
