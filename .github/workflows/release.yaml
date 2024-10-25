@@ -1,0 +1,56 @@
+on:
+    push:
+        tags:
+            - '*'
+
+name: 📦 Release a New Version of Missive.js
+
+permissions:
+    contents: write
+
+jobs:
+    build-and-test:
+        uses: ./.github/workflows/build-and-tests.yaml
+
+    release:
+        name: 🚀 Release on Github
+        runs-on: ubuntu-latest
+        needs: ['build-and-test']
+        steps:
+            - name: 🏷 Create Release
+              uses: ncipollo/release-action@v1
+              with:
+                  draft: false
+                  prerelease: false
+    publish:
+        name: 🗼 Publish to NPM
+        runs-on: ubuntu-latest
+        needs: ['build-and-test']
+        steps:
+            - name: ⬇️ Checkout repo
+              uses: actions/checkout@v4
+
+            - name: ⎔ Setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+
+            - name: ⎔ Set up pnpm
+              uses: pnpm/action-setup@v4
+
+            - name: 📥 Download deps
+              run: pnpm install --frozen-lockfile
+
+            - name: 📲 Test the builds
+              run: pnpm run build -F missive.js
+
+            - name: 🔐 Set publishing config
+              run: pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+            - name: 📢 Publish to NPM
+              run: pnpm publish --access public --no-git-checks --F missive.js
+              env:
+                  NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

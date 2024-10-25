@@ -4,7 +4,11 @@
     "globalDependencies": ["**/.env*"],
     "tasks": {
         "build": {
-            "dependsOn": ["^build"],
+            "dependsOn": ["build:missive.js", "^build"],
+            "outputs": ["build/**"]
+        },
+        "build:missive.js": {
+            "dependsOn": [],
             "outputs": ["build/**"]
         },
         "lint:check": {
@@ -14,13 +18,21 @@
             "cache": false
         },
         "dev": {
-            "cache": false,
-            "persistent": true
+            "cache": false
         },
         "watch": {
+            "persistent": true,
+            "dependsOn": ["watch:missive.js", "^watch"],
+            "cache": false
+        },
+        "watch:missive.js": {
+            "dependsOn": [],
+            "persistent": true,
+            "outputs": ["build/**"],
             "cache": false
         },
         "test": {
+            "dependsOn": [],
             "cache": false
         },
         "types:check": {
