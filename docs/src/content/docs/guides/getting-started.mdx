@@ -1,5 +1,5 @@
 ---
-title: Gettting started
+title: Getting started
 description: A guide on how to first use the Service Bus
 ---
 
@@ -27,10 +27,7 @@ Here we are going to create an handler aside its definitions.
 <Aside text="Understand this code" variant='note'>
 Only 3 things are going to change in your code. `Type`, `handler` and `Schema`. The following lines are a boilerplate code that you can copy-paste for a Command.
 ```typescript
-
 type Deps = {/* your dependencies here */};
-
-const Type = 'YOUR_TYPE' as const;
 
 export const Schema = z.object({
     /* your schema here */
@@ -38,10 +35,10 @@ export const Schema = z.object({
 
 type Command = z.infer<typeof Schema>;
 type Result = Awaited<ReturnType<typeof handler>>;
-export type Definition = { [Type]: { command: Command; result: Result } };
+export type Definition = CommandHandlerDefinition<'createUser', Command, Result>;
 
 const handler = async (envelope: Envelope<Command>, deps: Deps) => {
-// your handler code here
+    /* your handler code here */
 };
 
 export const Factory = (deps: Deps) => (query: Envelope<Command>) => handler(query, deps);
