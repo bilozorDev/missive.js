@@ -14,6 +14,16 @@ export default defineConfig({
     base: `${githubPathParts[2]}`,
     integrations: [
         starlight({
+            head: [
+                {
+                    tag: 'script',
+                    attrs: {
+                        src: 'https://plausible.io/js/script.js',
+                        'data-domain': 'missive-js.github.io/missive.js',
+                        defer: true,
+                    },
+                },
+            ],
             title,
             logo: {
                 src: './src/assets/envelope.svg',
