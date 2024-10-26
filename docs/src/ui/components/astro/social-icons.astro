@@ -1,0 +1,17 @@
+---
+import type { Props } from '@astrojs/starlight/props';
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+---
+
+<img
+    src="https://github.com/missive-js/missive.js/actions/workflows/main-ci.yaml/badge.svg?branch=main"
+    alt="Missive.js Main Build Status"
+    height="20"
+    loading="lazy"
+/>
+<img src="https://packagephobia.com/badge?p=missive.js" alt="Missive.js Install Size" height="20" loading="lazy" />
+<img src="https://badgen.net/bundlephobia/minzip/missive.js" alt="Missive.js Install Size" height="20" loading="lazy" />
+
+<Default {...Astro.props}>
+    <slot />
+</Default>

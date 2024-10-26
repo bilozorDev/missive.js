@@ -25,6 +25,7 @@ export default defineConfig({
             customCss: ['./src/tailwind.css'],
             components: {
                 Footer: './src/ui/components/astro/footer.astro',
+                SocialIcons: './src/ui/components/astro/social-icons.astro',
             },
             sidebar: [
                 {

@@ -9,6 +9,7 @@ PACKAGE_MANAGER := pnpm
 CURRENT_DIR := $(shell pwd)
 DEPENDENCIES := node pnpm git
 NODE := node -r dotenv/config
+MISSIVEJS_VERSION := $(shell node -e "console.log(require('./libs/missive.js/package.json').version)")
 
 .PHONY: list
 list:
@@ -82,4 +83,9 @@ serve-astro-example: ## Run the Astro Example
 .PHONY: serve-nextjs-example
 serve-nextjs-example: ## Run the Next JS Example
 	@$(PACKAGE_MANAGER) run dev --filter=missive.js-nextjs-example
+
+.PHONY: release
+release: ## Create a Realease (tag and push)
+	@git tag -s -a v$(MISSIVEJS_VERSION) -m "v$(MISSIVEJS_VERSION)"
+	@git push origin v$(MISSIVEJS_VERSION)
 

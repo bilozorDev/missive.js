@@ -1,6 +1,6 @@
 # Missive JS
 
-## ![Main](https://github.com/missive-js/missive.js/actions/workflows/main-ci.yaml/badge.svg?branch=main) ![Main](https://github.com/missive-js/missive.js/actions/workflows/deploy-to-pages.yaml/badge.svg?branch=main)
+## ![Main](https://github.com/missive-js/missive.js/actions/workflows/main-ci.yaml/badge.svg?branch=main) ![Main](https://github.com/missive-js/missive.js/actions/workflows/deploy-to-pages.yaml/badge.svg?branch=main) [![Install size](https://packagephobia.com/badge?p=missive.js)](https://packagephobia.com/result?p=missive.js) ![Tree shaking](https://badgen.net/bundlephobia/tree-shaking/missive.js) ![Minizipped size](https://badgen.net/bundlephobia/minzip/missive.js)
 
 The Service Bus that you needed!
 

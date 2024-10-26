@@ -16,9 +16,13 @@ hero:
           link: '#in-a-nutshell'
           icon: right-arrow
           variant: minimal
+        - text: Middlewares
+          link: '#built-in-middlewares'
+          icon: puzzle
+          variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem, Icon, Badge  } from '@astrojs/starlight/components';
 import Install from './includes/steps/install.mdx';
 import CreateHandler from './includes/steps/create-handler.mdx';
 import DefineBus from './includes/steps/create-bus.mdx';
@@ -79,5 +83,94 @@ We love clean architecture and CQRS, we didn't find any simple Service Bus that 
         title="Getting Started"
         href="/missive.js/guides/getting-started"
         description="Create your first handles and buses."
+    />
+    <LinkCard
+        title="Contributing"
+        href="/missive.js/contributing"
+        description="Help us to make Missive.js even better."
+    />
+</CardGrid>
+
+## Built-in Middlewares
+
+Those are the built-in [middlewares](/missive.js/guides/middlewares) that you can use out of the box. They are all optional and you can use them all together or just the ones you need.
+Middlewares provides a way to handle cross-cutting concerns. They are key to keep your code clean and maintainable.
+And most of all, they are easy to write and to use, and they can be generic!
+
+That's the power of Missive.js! Here are the built-in middlewares <Badge text='coming soon' variant='caution'/>:
+
+<CardGrid>
+    <LinkCard
+        title="Logger Middlewares"
+        href="#todo"
+        description="Log the messages (intent) and the full Envelope (with the Stamps) once handled in the backend of your choice."
+    />
+    <LinkCard
+        title="Retry Middleware"
+        href="#todo"
+        description="Automatically retries processing a message a specified number of times before considering it as failed, with a backoff strategy."
+    />
+    <LinkCard
+        title="Async Middleware"
+        href="#todo"
+        description="Push the intent to a queue and handle it asynchronously."
+    />
+    <LinkCard
+        title="Caching Middleware"
+        href="#todo"
+        description="Caches responses or message results for faster access in future requests, reducing load on the system."
+    />
+</CardGrid>
+
+
+## Framework Agnostic, see the examples
+
+<ul class="list-none">
+    <li>
+        <div class='flex'>
+            <Icon name="github" />
+            <a href="https://github.com/Missive-js/missive.js/tree/main/examples/remix-run" class="ml-2" target="_blank">Remix Run Example</a>
+        </div>
+    </li>
+    <li>
+        <div class='flex'>
+            <Icon name="github" />
+            <a href="https://github.com/Missive-js/missive.js/tree/main/examples/nextjs" class="ml-2" target="_blank">Next.js Example</a>
+        </div>
+    </li>
+    <li>
+        <div class='flex'>
+            <Icon name="github" />
+            <a href="https://github.com/Missive-js/missive.js/tree/main/examples/astro" class="ml-2" target="_blank">Astro Example</a>
+        </div>
+    </li>
+    <li>
+        <div class='flex'>
+            <Icon name="github" />
+            <a href="https://github.com/Missive-js/missive.js/tree/main/examples/cli" class="ml-2" target="_blank">Simple CLI Example</a>
+        </div>
+    </li>
+</ul>
+
+<CardGrid>
+    <LinkButton
+        title="Remix Run"
+        href="https://github.com/Missive-js/missive.js/tree/main/examples/remix-run"
+        variant="minimal"
+    />
+    <LinkButton
+        title="Next.js"
+        href="https://github.com/Missive-js/missive.js/tree/main/examples/nextjs"
+        variant="minimal"
+    />
+    <LinkButton
+        title="Astro"
+        href="https://github.com/Missive-js/missive.js/tree/main/examples/astro"
+        variant="minimal"
+    />
+    <LinkButton
+        title="Simple Command Line Script"
+        href="https://github.com/Missive-js/missive.js/tree/main/examples/cli"
+        variant="minimal"
     />
 </CardGrid>

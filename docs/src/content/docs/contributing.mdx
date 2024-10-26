@@ -4,3 +4,94 @@ description: How to contribute to Missive.js
 prev: false
 next: false
 ---
+import { Steps, LinkButton } from '@astrojs/starlight/components';
+
+You are on the good page! We need you! Missive.js is an open-source project and we are looking for contributors. You can help us in many ways:
+- Reporting bugs
+- Suggesting new features
+- Writing documentation
+- Writing tests
+- Fixing bugs
+- Implementing new features
+
+Also, you can help us by sharing Missive.js with your friends and colleagues. The more people use Missive.js, the more feedback we get and the better
+the project becomes.
+
+We have also never-ending stories:
+- coding examples with different frameworks
+- build new Middlewares! **The more middleware we have, the more powerful Missive.js becomes!**
+
+> There is also always a need for financial support. If you want to help us financially, you can do so by becoming a sponsor on GitHub or by making a donation on Open Collective.
+
+
+## How to contribute to the repository?
+
+We are using GitHub to manage the project. You can find the source code there.
+
+<Steps>
+
+1. Fork the repository on Github so you can make changes to your own copy of the repository.
+
+    <LinkButton icon="github" variant="secondary" href="https://github.com/Missive-js/missive.js/fork" iconPlacement='start'>Fork me!</LinkButton>
+
+2. Clone your fork
+
+    ```bash
+    git clone YOURFORK
+    ```
+
+3. Create a new branch for your feature or bug fix
+
+    ```bash
+    git checkout -b my-feature
+    ```
+4. Make your changes
+
+5. Commit your changes
+
+    ```bash
+    git commit -m "feat: this is a new middleware to do something"
+    ```
+
+6. Push your changes to your fork
+
+    ```bash
+    git push origin my-feature
+    ```
+
+7. Create a pull request on GitHub against the `main` branch of the main repository
+
+8. Wait for the review and the merge
+
+9. Celebrate! 🎉
+
+    And share your contribution to the world!
+</Steps>
+
+
+## We have some toolings and conventions to help streamline the process
+
+Using Makefile, we have some commands to help you:
+- `make install` to install the dependencies
+- `make tests` to run the tests
+- `make build` to build the project
+- `make codeclean` to lint & check the project
+
+Also we have targets to run the project in development mode:
+- `make serve-docs` to run the documentation site
+- `make serve-astro-example` to run the Astro example
+- `make serve-nextjs-example` to run the Next.js example
+- `make serve-remix-run-example` to run the Remix Run example
+- `make serve-cli-example` to run the CLI example
+
+> As you can see, we are missing some obivous examples. You can help us by creating those: Svelte, Vue, Angular, etc.
+
+## Conventions
+
+- We are using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) to manage the commits
+- We are using [Semantic Versioning](https://semver.org/) to manage the versions
+- We are using [Prettier](https://prettier.io/) to format the code
+- We are using [ESLint](https://eslint.org/) to lint the code
+- We are using [Vitest](https://vitest.dev/) to test the code
+
+> Remember to run `make tests` before pushing your changes to ensure the code is clean, formatted correctly and that the tests are passing.

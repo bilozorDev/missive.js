@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://missive-js.github.io/missive.js/sitemap-index.xml

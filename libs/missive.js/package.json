@@ -1,6 +1,17 @@
 {
     "name": "missive.js",
     "description": "A Service Bus with Envelope and Stamps fully-typed for Typescript as well as Middlewares",
+    "keywords": [
+        "service bus",
+        "bus",
+        "envelope",
+        "stamp",
+        "middleware",
+        "typescript",
+        "zod",
+        "missive",
+        "cqrs"
+    ],
     "author": "Sébastien Morel <plopix@gmail.com>",
     "license": "MIT",
     "contributors": [
