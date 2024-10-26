@@ -1,41 +1,21 @@
-import { Schema as ZodSchema } from 'zod';
-import { createEnvelope, Envelope } from './envelope.js';
-import { Prettify, ReplaceKeys } from './utils.js';
+import type { Schema as ZodSchema } from 'zod';
+import { createEnvelope, HandledStamp, IdentityStamp, type Envelope } from './envelope.js';
+import type { Prettify, ReplaceKeys } from '../utils/types.js';
+import type { CommandMiddleware, EventMiddleware, Middleware, QueryMiddleware } from './middleware.js';
+import { nanoid } from 'nanoid';
 
-type BusKinds = 'query' | 'command' | 'event';
+export type BusKinds = 'query' | 'command' | 'event';
+export type MessageRegistryType<BusKind extends BusKinds> = Record<string, HandlerDefinition<BusKind>>;
+export type CommandMessageRegistryType = Record<string, HandlerDefinition<'command'>>;
+export type QueryMessageRegistryType = Record<string, HandlerDefinition<'query'>>;
+export type EventMessageRegistryType = Record<string, HandlerDefinition<'event'>>;
 
-type MessageRegistryType<BusKind extends BusKinds> = Record<string, HandlerDefinition<BusKind>>;
-type CommandMessageRegistryType = Record<string, HandlerDefinition<'command'>>;
-type QueryMessageRegistryType = Record<string, HandlerDefinition<'query'>>;
-type EventMessageRegistryType = Record<string, HandlerDefinition<'event'>>;
-
-type MessageRegistry<
+export type MessageRegistry<
     BusKind extends BusKinds,
     HandlerDefinitions extends MessageRegistryType<BusKind>,
 > = HandlerDefinitions[keyof HandlerDefinitions][BusKind];
 
 type TypedMessage<Message, MessageName extends string = string> = Message & { __type: MessageName };
-
-type Middleware<BusKind extends BusKinds, HandlerDefinitions extends MessageRegistryType<BusKind>> = (
-    envelope: Envelope<MessageRegistry<BusKind, HandlerDefinitions>>,
-    next: () => Promise<void>,
-) => Promise<void>;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type GenericMiddleware = Middleware<any, any>;
-
-export type CommandMiddleware<HandlerDefinitions extends CommandMessageRegistryType> = Middleware<
-    'command',
-    HandlerDefinitions
->;
-export type QueryMiddleware<HandlerDefinitions extends QueryMessageRegistryType> = Middleware<
-    'query',
-    HandlerDefinitions
->;
-export type EventMiddleware<HandlerDefinitions extends EventMessageRegistryType> = Middleware<
-    'event',
-    HandlerDefinitions
->;
 
 type MessageHandler<Intent, Result> = (envelope: Envelope<Intent>) => Promise<Result>;
 type HandlerDefinition<BusKind extends BusKinds, Intent = object, Result = object> = {
@@ -88,28 +68,28 @@ type MissiveBus<BusKind extends BusKinds, HandlerDefinitions extends MessageRegi
     ) => TypedMessage<HandlerDefinitions[MessageName][BusKind], MessageName>;
 };
 
-type CommandBus<HandlerDefinitions extends CommandMessageRegistryType> = ReplaceKeys<
+type MissiveCommandBus<HandlerDefinitions extends CommandMessageRegistryType> = ReplaceKeys<
     MissiveBus<'command', HandlerDefinitions>,
     { createCommand: 'createIntent' }
 >;
-export type MissiveCommandBus<HandlerDefinitions extends CommandMessageRegistryType> = Prettify<
-    CommandBus<HandlerDefinitions>
+export type CommandBus<HandlerDefinitions extends CommandMessageRegistryType> = Prettify<
+    MissiveCommandBus<HandlerDefinitions>
 >;
 
-type QueryBus<HandlerDefinitions extends QueryMessageRegistryType> = ReplaceKeys<
+type MissiveQueryBus<HandlerDefinitions extends QueryMessageRegistryType> = ReplaceKeys<
     MissiveBus<'query', HandlerDefinitions>,
     { createQuery: 'createIntent' }
 >;
-export type MissiveQueryBus<HandlerDefinitions extends QueryMessageRegistryType> = Prettify<
-    QueryBus<HandlerDefinitions>
+export type QueryBus<HandlerDefinitions extends QueryMessageRegistryType> = Prettify<
+    MissiveQueryBus<HandlerDefinitions>
 >;
 
-type EventBus<HandlerDefinitions extends EventMessageRegistryType> = ReplaceKeys<
+type MissiveEventBus<HandlerDefinitions extends EventMessageRegistryType> = ReplaceKeys<
     MissiveBus<'event', HandlerDefinitions>,
     { createEvent: 'createIntent' }
 >;
-export type MissiveEventBus<HandlerDefinitions extends EventMessageRegistryType> = Prettify<
-    EventBus<HandlerDefinitions>
+export type EventBus<HandlerDefinitions extends EventMessageRegistryType> = Prettify<
+    MissiveEventBus<HandlerDefinitions>
 >;
 
 type HandlerConfig<
@@ -168,6 +148,7 @@ const createBus = <BusKind extends BusKinds, HandlerDefinitions extends MessageR
     ) => {
         return async (message: HandlerDefinitions[MessageName][BusKind]) => {
             const envelope: Envelope<HandlerDefinitions[MessageName][BusKind]> = createEnvelope(message);
+            envelope.addStamp<IdentityStamp>('missive:identity', { id: nanoid() });
             let index = 0;
 
             const next = async () => {
@@ -177,11 +158,17 @@ const createBus = <BusKind extends BusKinds, HandlerDefinitions extends MessageR
                 } else {
                     if (handlers.length === 1) {
                         const result = await handlers[0](envelope);
-                        envelope.addStamp<HandlerDefinitions[MessageName]['result']>('handled', result);
+                        envelope.addStamp<HandledStamp<HandlerDefinitions[MessageName]['result']>>(
+                            'missive:handled',
+                            result,
+                        );
                     } else {
                         const results = await Promise.all(handlers.map(async (handler) => await handler(envelope)));
                         results.forEach((result) =>
-                            envelope.addStamp<HandlerDefinitions[MessageName]['result']>('handled', result),
+                            envelope.addStamp<HandledStamp<HandlerDefinitions[MessageName]['result']>>(
+                                'missive:handled',
+                                result,
+                            ),
                         );
                     }
                 }
@@ -210,7 +197,8 @@ const createBus = <BusKind extends BusKinds, HandlerDefinitions extends MessageR
             envelope,
             // this is on purpose we return the last handled result
             // if the user wants to access the result of a specific handler, it can be done via the envelope
-            result: envelope.lastStamp<HandlerDefinitions[MessageName]['result']>('handled')?.context,
+            result: envelope.lastStamp<HandledStamp<HandlerDefinitions[MessageName]['result']>>('missive:handled')
+                ?.body,
         };
     };
 

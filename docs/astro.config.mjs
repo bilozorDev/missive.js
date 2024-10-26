@@ -41,6 +41,10 @@ export default defineConfig({
                     autogenerate: { directory: 'guides' },
                 },
                 {
+                    label: 'Built-in Middlewares',
+                    autogenerate: { directory: 'built-in-middlewares' },
+                },
+                {
                     label: 'Contributing',
                     slug: 'contributing',
                     badge: {

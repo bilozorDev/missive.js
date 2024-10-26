@@ -1,0 +1,87 @@
+---
+title: Logger Middleware
+description: Built-in middleware to add observability to your application by logging in the backend of your choice.
+---
+
+import { Icon, Aside } from '@astrojs/starlight/components';
+
+
+The Logger Middleware is built-in middleware that gives you capability to add observability to your application by logging:
+- the intent (`query`, `command` or `event`) before and once handled (or errored)
+- the result(s) of the handler(s)
+- the Stamps
+
+## How to use it
+
+As for any Middleware, you can use it by adding it to the `bus` instance.
+
+```typescript
+const loggerMiddleware = createLoggerMiddleware(adapter);
+const queryBus = createQueryBus<QueryHandlerRegistry>();
+queryBus.use(loggerMiddleware);
+```
+
+Of course, the key is in the `adapter` that you will provide to the `createLoggerMiddleware` function. 
+This adapter must respect the `LoggerAdapter` interface.
+
+Here is an example: 
+
+```typescript
+export const consoleLogger: LoggerAdapter = {
+    processing: (identity, message, results, stamps) =>
+        console.log(
+            `Processing Envelope<${identity?.body?.id}>`,
+            JSON.stringify({
+                message,
+                results,
+                stamps,
+            }),
+        ),
+    processed: (identity, message, results, stamps) =>
+        console.log(
+            `Processed Envelope<${identity?.body?.id}>`,
+            JSON.stringify({
+                message,
+                results,
+                stamps,
+            }),
+        ),
+    error: (identity, message, results, stamps) =>
+        console.error(
+            `Error with Envelope<${identity?.body?.id}>`,
+            JSON.stringify({
+                message,
+                results,
+                stamps,
+            }),
+        ),
+};
+```
+
+### Explanation
+
+Internally, the Logger Middleware is going to call that adapter 2 times:
+- `processing`: when the message is received
+- `processed`: when the message is handled
+- `error`: when the message is in error
+
+The parameters for each of those functions are:
+- `identity`: A Stamp that contains the `id` of the Envelope
+- `message`: The intent that has been dispatched
+- `results`: The result(s) of the handler(s)
+- `stamps`: The rest of the Stamps. (yes Identify and Results are extracted stamps from the Envelope)
+
+<Aside title="Gotcha!" type="caution">
+Those function can be `async`, the middleware will `await` for the promise to be resolved before continuing.
+Which means that you can log to a database or any other async operation BUT be careful with the performance.
+There are 2 options you can pass to the `createLoggerMiddleware` function:
+- `options.async`: the logger will not `await` for the promises to be resolved
+- `options.collect`: the logger will collect the logs without awaiting during collection, and then `await` or not based on the `async` option.
+</Aside>
+
+## Going further
+
+     <div class='flex flex-row'>
+            <span className='pr-2'>Look at the code of the </span>
+            <a href="https://github.com/Missive-js/missive.js/tree/main/libs/missive.js/src/middlewares/logger-middleware.ts" class="contents" target="_blank"><Icon name="github" class="mr-2"/>Logger Middleware</a>
+        </div>

@@ -34,8 +34,7 @@ We love clean architecture and CQRS, we didn't find any simple Service Bus that 
 
 <CardGrid stagger>
     <Card title="Easy to use" icon="rocket">
-        Simple, pragmatic, super lightweight, no magic, just what you need and all Open Source with only 1 (peer)
-        dependency (zod).
+        Simple, pragmatic, super lightweight, no magic, just what you need and all Open Source.
     </Card>
     <Card title="Agnostic" icon="puzzle">
         You can use it with any framework or library, wether you're fully backend or backend for frontend, we got you
@@ -97,31 +96,31 @@ Those are the built-in [middlewares](/missive.js/guides/middlewares) that you ca
 Middlewares provides a way to handle cross-cutting concerns. They are key to keep your code clean and maintainable.
 And most of all, they are easy to write and to use, and they can be generic!
 
-That's the power of Missive.js! Here are the built-in middlewares <Badge text='coming soon' variant='caution'/>:
+That's the power of Missive.js! Here are the built-in middlewares:
 
 <CardGrid>
-    <LinkCard
-        title="Logger Middlewares"
-        href="#todo"
-        description="Log the messages (intent) and the full Envelope (with the Stamps) once handled in the backend of your choice."
-    />
-    <LinkCard
-        title="Retry Middleware"
-        href="#todo"
-        description="Automatically retries processing a message a specified number of times before considering it as failed, with a backoff strategy."
-    />
-    <LinkCard
-        title="Async Middleware"
-        href="#todo"
-        description="Push the intent to a queue and handle it asynchronously."
-    />
-    <LinkCard
-        title="Caching Middleware"
-        href="#todo"
-        description="Caches responses or message results for faster access in future requests, reducing load on the system."
-    />
-</CardGrid>
+    <Card title="Logger Middleware" icon="bars">
+        <p>Easily add observability to your application by logging the messages (intent) and the full Envelope (with the Stamps) before and 
+        once handled (or errored) in the backend of your choice.</p>
+        <LinkButton href={'/missive.js/built-in-middlewares/logger'} variant="secondary" class="float-right" title={"Read the doc about the Logger Middleware"}>Read the doc</LinkButton>
+    </Card>
 
+    <Card title="Retry Middleware" icon="random">
+        <p>Automatically retries processing a message a specified number of times before considering it as failed, with a backoff strategy.</p>
+        <LinkButton href={'/missive.js/contributing'} variant="secondary" class="float-right" ><Badge text='coming soon' variant='caution'/></LinkButton>
+    </Card>
+
+    <Card title="Caching Middleware" icon="approve-check-circle">
+        <p>Caches responses or message results for faster access in future requests, reducing load on the system.</p>
+        <LinkButton href={'/missive.js/contributing'} variant="secondary" class="float-right" ><Badge text='coming soon' variant='caution'/></LinkButton>
+    </Card>
+
+    <Card title="Async Middleware" icon="seti:nunjucks">
+        <p>You can already do async if you don't _await_ in your handler, but this is next level. Push the intent to a queue and handle it asynchronously.</p>
+        <p>Missive.js will provide the consumer which is going to be smart enough to handle the async processing.</p>
+        <LinkButton href={'/missive.js/contributing'} variant="secondary" class="float-right" ><Badge text='coming soon' variant='caution'/></LinkButton>
+    </Card>
+</CardGrid>
 
 ## Framework Agnostic, see the examples
 

@@ -22,15 +22,8 @@
             "persistent": true
         },
         "watch": {
-            "persistent": true,
-            "dependsOn": ["watch:missive.js", "^watch"],
-            "cache": false
-        },
-        "watch:missive.js": {
-            "dependsOn": [],
-            "persistent": true,
-            "outputs": ["build/**"],
-            "cache": false
+            "cache": false,
+            "persistent": true
         },
         "test": {
             "dependsOn": [],

@@ -18,7 +18,7 @@
         "Sébastien Morel <plopix@gmail.com>",
         "Anaël Chardan"
     ],
-    "version": "0.0.2",
+    "version": "0.0.3",
     "type": "module",
     "main": "./build/index.cjs",
     "module": "./build/index.js",
@@ -53,7 +53,7 @@
     "scripts": {
         "types:check": "tsc --noEmit",
         "build": "cp ../../README.md . && tsup",
-        "watch": "rm -rf build && tsc -W --preserveWatchOutput",
+        "watch": "tsc -W --preserveWatchOutput",
         "lint:check": "eslint .",
         "lint:fix": "eslint . --fix",
         "test": "vitest run"
@@ -65,5 +65,8 @@
         "package.json",
         "build",
         "LICENSE.md"
-    ]
+    ],
+    "dependencies": {
+        "nanoid": "^5.0.7"
+    }
 }

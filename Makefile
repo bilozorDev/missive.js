@@ -52,7 +52,6 @@ build: ## Build All
 
 .PHONY: watch
 watch: ## Watch
-	@bash tools/create-index-file-for-lib.bash
 	@$(PACKAGE_MANAGER) watch
 
 .PHONY: only-tests

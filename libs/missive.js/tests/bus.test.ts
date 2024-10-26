@@ -1,7 +1,8 @@
 import { expect, it, beforeEach, describe } from 'vitest';
 import { z, Schema } from 'zod';
-import { Envelope } from '../src/envelope';
-import { createQueryBus, MissiveQueryBus, QueryMiddleware } from '../src/bus';
+import { Envelope } from '../src/core/envelope';
+import { createQueryBus, QueryBus } from '../src/core/bus';
+import { QueryMiddleware } from '../src/core/middleware';
 
 type MyEvents = {
     event1: { query: { foo: string }; result: { bar: number } };
@@ -9,7 +10,7 @@ type MyEvents = {
 };
 
 describe('Bus', () => {
-    let bus: MissiveQueryBus<MyEvents>;
+    let bus: QueryBus<MyEvents>;
 
     beforeEach(() => {
         bus = createQueryBus<MyEvents>();
