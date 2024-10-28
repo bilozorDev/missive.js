@@ -1,11 +1,11 @@
 ---
 title: A Service Bus with Envelope and Stamps fully-typed for Typescript that you needed
-description: Fully typed Service Bus for Node.js built in Typescript
+description: Fully-typed Service Bus for Node.js fueled by fancy Middlwares, Envelopes and Stamps.
 template: splash
 
 hero:
     title: The Service Bus that you needed
-    tagline: Fully-typed Service Bus for Node.js built in Typescript.
+    tagline: Fully-typed Service Bus for Node.js fueled by fancy Middlwares, Envelopes and Stamps.
     image:
         file: ../../assets/bus.svg
     actions:
@@ -40,16 +40,17 @@ We love clean architecture and CQRS, we didn't find any simple Service Bus that 
         You can use it with any framework or library, wether you're fully backend or backend for frontend, we got you
         covered.
     </Card>
-    <Card title="Type-safe" icon="seti:typescript">
-        Define your `query`, `command` or `event` using a [Zod schema](https://zod.dev) for validation and type
-        inference. The `bus` instance is fully typed. _(You'll have auto-completion for free!)_
-    </Card>
     <Card title="Middlewares" icon="open-book">
         Can we call it a Service Bus without Middlewares? _(we don't)_. Register middlewares to leverage the full power
         of the service bus.
+        We got you covered with built-in middlewares like [Logger](/missive.js/built-in-middlewares/logger), [Caching](/missive.js/built-in-middlewares/cacher), [Retry](/missive.js/built-in-middlewares/retryer).
     </Card>
     <Card title="Envelopes and Stamps" icon="email">
         Handle cross-cutting concerns with Envelopes and Stamps.
+    </Card>
+    <Card title="Type-safe" icon="seti:typescript">
+        Define your `query`, `command` or `event` using a [Zod schema](https://zod.dev) for validation and type
+        inference. The `bus` instance is fully typed. _(You'll have auto-completion for free!)_
     </Card>
 </CardGrid>
 
@@ -97,7 +98,7 @@ We love clean architecture and CQRS, we didn't find any simple Service Bus that 
 
 ## Built-in Middlewares
 
-Those are the built-in [middlewares](/missive.js/guides/middlewares) that you can use out of the box. They are all optional and you can use them all together or just the ones you need.
+Whitout Middlewares, a Service Bus is almost useless, we provide built-in [middlewares](/missive.js/guides/middlewares) that you can use out of the box. They are all optional and you can use them all together or just the ones you need.
 Middlewares provides a way to handle cross-cutting concerns. They are key to keep your code clean and maintainable.
 And most of all, they are easy to write and to use, and they can be generic!
 
@@ -115,8 +116,8 @@ That's the power of Missive.js! Here are the built-in middlewares:
     </Card>
 
     <Card title="Retry Middleware" icon="random">
-        <p>Automatically retries processing a message a specified number of times before considering it as failed, with a backoff strategy.</p>
-        <LinkButton href={'/missive.js/contributing'} variant="secondary" class="float-right" ><Badge text='coming soon' variant='caution'/></LinkButton>
+        <p>Automatically retries processing an intent a specified number of times before considering it as failed, with different backoff strategy.</p>
+        <LinkButton href={'/missive.js/built-in-middlewares/retryer'} variant="secondary" class="float-right" title={"Read the doc about the Retryer Middleware"}>Read the doc</LinkButton>
     </Card>
 
     <Card title="Async Middleware" icon="seti:nunjucks">

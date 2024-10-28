@@ -17,3 +17,6 @@ export { createLoggerMiddleware } from './middlewares/logger-middleware.js';
 
 export type { CacherAdapter, CacheableStamp, FromCacheStamp } from './middlewares/cacher-middleware.js';
 export { createCacherMiddleware } from './middlewares/cacher-middleware.js';
+
+export type { RetriedStamp } from './middlewares/retryer-middleware.js';
+export { createRetryerMiddleware } from './middlewares/retryer-middleware.js';

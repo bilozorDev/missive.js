@@ -13,7 +13,11 @@ It's only available for _QueryBus_
 As for any Middleware, you can use it by adding it to the `bus` instance.
 
 ```typescript
-const cacherMiddleware = createCacherMiddleware<QueryHandlerRegistry>({ adapter, cache: 'all', defaultTtl: 3600 });
+const cacherMiddleware = createCacherMiddleware<QueryHandlerRegistry>({ 
+    adapter, 
+    cache: 'all', 
+    defaultTtl: 3600 
+});
 const queryBus = createQueryBus<QueryHandlerRegistry>();
 queryBus.use(cacherMiddleware);
 ```

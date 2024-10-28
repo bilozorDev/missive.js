@@ -1,0 +1,56 @@
+---
+title: Retryer Middleware
+description: Built-in middleware to retry handling if in error.
+---
+
+import { Icon, Aside } from '@astrojs/starlight/components';
+
+The Retryer Middleware is built-in middleware that gives you capability to retry the handling of an intent.
+
+## How to use it
+
+As for any Middleware, you can use it by adding it to the `bus` instance.
+
+```typescript
+const retryerMiddleware = createRetryerMiddleware({
+    maxAttempts: 5;
+    waitingAlgorithm: 'exponential',
+    multiplier: 1.5;
+    jitter: 0.5;
+});
+const queryBus = createQueryBus<QueryHandlerRegistry>();
+queryBus.use(retryerMiddleware);
+```
+
+### Explanation
+
+The Retryer middleware is going to catch the exection and re-run the following middleware until the `maxAttempts` is reached.
+Between each attempt, the middleware is going to wait for a certain amount of time. 
+The `waitingAlgorithm` can be `exponential`, `fibonacci`, or `none`.
+
+- `jitter` is a value between 0 and 1 that will add some randomness to the waiting time.
+- `multiplier` is the factor to multiply the waiting time between each attempt. (only used for `exponential`)
+
+<Aside title="Error Stamps" type="caution">
+Retryer Middleware will also retry the handling of the intent if it finds more `error` stamps than before.
+Some handlers might not throw exceptions but add `error` stamps to the result. A good example would be a lock middleware that would
+add an `error` stamp if the lock is not acquired.
+</Aside>
+
+## Added Stamps 
+
+The Retryer Middleware is going to add:
+
+    -     
+        ```typescript
+        type RetriedStamp = Stamp<{ attempt: number; errorMessage: string }, 'missive:retried'>;
+        ```
+        > Every time the middleware retries the handling of the intent, it will add a `RetriedStamp` to the envelope.
+
+
+## Going further
+
+<div class='flex flex-row'>
+    <span className='pr-2'>Look at the code of the </span>
+    <a href="https://github.com/Missive-js/missive.js/tree/main/libs/missive.js/src/middlewares/retryer-middleware.ts" class="contents" target="_blank"><Icon name="github" class="mr-2"/>Retryer Middleware</a>
+</div>

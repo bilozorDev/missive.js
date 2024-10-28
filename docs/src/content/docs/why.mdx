@@ -44,9 +44,14 @@ centralized system for handling Commands, Queries, and Events, allowing you to b
 
 2. **Middleware system**: Missive.js includes a powerful middleware system that allows you to inject cross-cutting concerns, such as:
 
--   **Logging**: Consistent logging across all operations, providing centralized insight into your application's behavior.
 -   **Validation**: Reusable validation logic that ensures all incoming data adheres to your application's requirements before it reaches the handlers.
 -   **Authorization**: Easy-to-implement access control checks that run before commands or queries are processed.
+
+And on top of what you can do on your own, Missive.js provides a set of built-in middlewares to handle common concerns like:
+-  [**Caching**](/missive.js/built-in-middlewares/cacher): Cache the results of queries to speed up your application.
+-  [**Retryer**](/missive.js/built-in-middlewares/retryer): Retry handling if an error occurs.
+-  [**Logger**](/missive.js/built-in-middlewares/logger): Log the messages and the full Envelope (with the Stamps) before and once handled (or errored) in the backend of your choice.
+
 
 This middleware architecture is familiar if you've used libraries like Express, Fastify, Koa, etc. making it intuitive for both backend and frontend developers.
 It centralizes the processing logic, making your code cleaner and easier to maintain.
