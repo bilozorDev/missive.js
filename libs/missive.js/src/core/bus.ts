@@ -156,21 +156,13 @@ const createBus = <BusKind extends BusKinds, HandlerDefinitions extends MessageR
                     const middleware = middlewares[index++];
                     await middleware(envelope, next);
                 } else {
-                    if (handlers.length === 1) {
-                        const result = await handlers[0](envelope);
+                    const results = await Promise.all(handlers.map(async (handler) => await handler(envelope)));
+                    results.forEach((result) =>
                         envelope.addStamp<HandledStamp<HandlerDefinitions[MessageName]['result']>>(
                             'missive:handled',
                             result,
-                        );
-                    } else {
-                        const results = await Promise.all(handlers.map(async (handler) => await handler(envelope)));
-                        results.forEach((result) =>
-                            envelope.addStamp<HandledStamp<HandlerDefinitions[MessageName]['result']>>(
-                                'missive:handled',
-                                result,
-                            ),
-                        );
-                    }
+                        ),
+                    );
                 }
             };
 
