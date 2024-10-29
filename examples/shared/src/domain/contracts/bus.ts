@@ -9,8 +9,9 @@ import {
     Stamp,
 } from 'missive.js';
 import { UserRemovedHandlerDefinition } from '../use-cases/user-removed.js';
+import { GetOrdersHandlerDefinition } from '../use-cases/get-orders.js';
 
-export type QueryHandlerRegistry = GetUserHandlerDefinition;
+export type QueryHandlerRegistry = GetUserHandlerDefinition & GetOrdersHandlerDefinition;
 export type QueryBus = MissiveQueryBus<QueryHandlerRegistry>;
 
 export type CommandHandlerRegistry = CreateUserHandlerDefinition & RemoveUserHandlerDefinition;

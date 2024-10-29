@@ -15,8 +15,6 @@ describe('createRetryerMiddleware', () => {
         const middleware = createRetryerMiddleware({
             maxAttempts: 5,
             waitingAlgorithm: 'none',
-            multiplier: 0,
-            jitter: 0,
         });
         nextMock.mockRejectedValueOnce(new Error('Test Error'));
         nextMock.mockRejectedValueOnce(new Error('Test Error'));
@@ -31,8 +29,6 @@ describe('createRetryerMiddleware', () => {
         const middleware = createRetryerMiddleware({
             maxAttempts: 3,
             waitingAlgorithm: 'none',
-            multiplier: 0,
-            jitter: 0,
         });
         nextMock.mockRejectedValueOnce(new Error('Test Error'));
 
@@ -51,8 +47,6 @@ describe('createRetryerMiddleware', () => {
         const middleware = createRetryerMiddleware({
             maxAttempts: 2,
             waitingAlgorithm: 'none',
-            multiplier: 0,
-            jitter: 0,
         });
         nextMock.mockRejectedValue(new Error('Test Error'));
 
@@ -69,8 +63,6 @@ describe('createRetryerMiddleware', () => {
         const middleware = createRetryerMiddleware({
             maxAttempts: 3,
             waitingAlgorithm: 'none',
-            multiplier: 0,
-            jitter: 0,
         });
         nextMock.mockResolvedValueOnce(undefined);
 
@@ -84,8 +76,6 @@ describe('createRetryerMiddleware', () => {
         const middleware = createRetryerMiddleware({
             maxAttempts: 2,
             waitingAlgorithm: 'none',
-            multiplier: 0,
-            jitter: 0,
         });
         nextMock.mockRejectedValue(new Error('test error'));
         await expect(middleware(envelope, nextMock)).rejects.toThrow('test error');
@@ -96,8 +86,6 @@ describe('createRetryerMiddleware', () => {
         const middleware = createRetryerMiddleware({
             maxAttempts: 3,
             waitingAlgorithm: 'none',
-            multiplier: 0,
-            jitter: 0,
         });
 
         nextMock.mockImplementationOnce(() => {

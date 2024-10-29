@@ -1,5 +1,5 @@
-import { Envelope, HandledStamp, IdentityStamp, Stamp } from '../core/envelope';
-import { GenericMiddleware } from '../core/middleware';
+import { Envelope, HandledStamp, IdentityStamp, Stamp } from '../core/envelope.js';
+import { GenericMiddleware } from '../core/middleware.js';
 
 export type LoggerAdapter = {
     processing: LogFunction;
@@ -126,7 +126,7 @@ export function createLoggerMiddleware({
             logs.push(() => log('error', envelope));
             throw error;
         } finally {
-            const allLogs = Promise.all(logs.map((log) => log()));
+            const allLogs = Promise.allSettled(logs.map((log) => log()));
             if (!async) {
                 await allLogs;
             }

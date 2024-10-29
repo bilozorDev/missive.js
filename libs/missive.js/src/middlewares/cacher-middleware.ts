@@ -1,6 +1,6 @@
-import { QueryMessageRegistryType } from '../core/bus';
-import { HandledStamp, Stamp } from '../core/envelope';
-import { Middleware } from '../core/middleware';
+import { QueryMessageRegistryType } from '../core/bus.js';
+import { HandledStamp, Stamp } from '../core/envelope.js';
+import { Middleware } from '../core/middleware.js';
 
 export type CacherAdapter = {
     get: (key: string) => Promise<unknown | null>;

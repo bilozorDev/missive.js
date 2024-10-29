@@ -1,3 +1,5 @@
+import { RetryConfiguration } from './types';
+
 const sleep = (s: number) => new Promise((r) => setTimeout(r, s * 1000));
 
 type Deps = {
@@ -39,4 +41,17 @@ export const createExponentialSleeper = (multiplier: number = 1.5, jitter: numbe
             currentDelay = 0.5;
         },
     };
+};
+
+export const sleeperFactory = ({ waitingAlgorithm, multiplier, jitter }: RetryConfiguration) => {
+    const noneSleeper = () => ({ wait: async () => {}, reset: () => {} });
+    if (!waitingAlgorithm || waitingAlgorithm === 'none') {
+        return noneSleeper();
+    }
+
+    if (waitingAlgorithm === 'exponential') {
+        return createExponentialSleeper(multiplier, jitter);
+    }
+
+    return createFibonnaciSleeper(jitter);
 };

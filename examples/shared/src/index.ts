@@ -4,6 +4,7 @@ export * from './domain/contracts/bus.js';
 export * from './domain/middlewares/logger.js';
 export * from './domain/middlewares/events.js';
 export * from './domain/use-cases/get-user.js';
+export * from './domain/use-cases/get-orders.js';
 export * from './domain/use-cases/user-created.js';
 export * from './domain/use-cases/user-created2.js';
 export * from './domain/use-cases/create-user.js';

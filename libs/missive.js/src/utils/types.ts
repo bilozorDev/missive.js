@@ -5,3 +5,10 @@ export type Prettify<T> = {
 export type ReplaceKeys<T, K extends { [key: string]: keyof T }> = {
     [P in keyof T as P extends K[keyof K] ? { [Q in keyof K]: K[Q] extends P ? Q : never }[keyof K] : P]: T[P];
 };
+
+export type RetryConfiguration = Partial<{
+    maxAttempts: number;
+    waitingAlgorithm: 'exponential' | 'fibonacci' | 'none';
+    multiplier: number;
+    jitter: number;
+}>;

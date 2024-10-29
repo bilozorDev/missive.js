@@ -15,7 +15,7 @@ export type MessageRegistry<
     HandlerDefinitions extends MessageRegistryType<BusKind>,
 > = HandlerDefinitions[keyof HandlerDefinitions][BusKind];
 
-type TypedMessage<Message, MessageName extends string = string> = Message & { __type: MessageName };
+export type TypedMessage<Message, MessageName extends string = string> = Message & { __type: MessageName };
 
 type MessageHandler<Intent, Result> = (envelope: Envelope<Intent>) => Promise<Result>;
 export type HandlerDefinition<BusKind extends BusKinds, Intent = object, Result = object> = {
@@ -154,7 +154,11 @@ const createBus = <BusKind extends BusKinds, HandlerDefinitions extends MessageR
             const next = async () => {
                 if (index < middlewares.length) {
                     const middleware = middlewares[index++];
-                    await middleware(envelope, next);
+                    // we give the __type to the middleware only
+                    await middleware(
+                        envelope as Envelope<TypedMessage<HandlerDefinitions[MessageName][BusKind], MessageName>>,
+                        next,
+                    );
                 } else {
                     const results = await Promise.all(handlers.map(async (handler) => await handler(envelope)));
                     results.forEach((result) =>

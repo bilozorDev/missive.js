@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createCacherMiddleware, CacherAdapter } from '../src/middlewares/cacher-middleware';
 import { Envelope } from '../src/core/envelope';
+import { TypedMessage } from '../src/core/bus';
 
 describe('createCacherMiddleware', () => {
     let adapter: CacherAdapter;
     let middleware: ReturnType<typeof createCacherMiddleware>;
-    let envelope: Envelope<object>;
+    let envelope: Envelope<TypedMessage<object>>;
     let next: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
@@ -14,12 +15,13 @@ describe('createCacherMiddleware', () => {
             set: vi.fn(),
         };
         envelope = {
+            __type: 'test-message',
             message: { query: 'test' },
             stamps: [],
             addStamp: vi.fn(),
             firstStamp: vi.fn(),
             lastStamp: vi.fn(),
-        } as unknown as Envelope<object>;
+        } as unknown as Envelope<TypedMessage<object>>;
         next = vi.fn();
     });
 

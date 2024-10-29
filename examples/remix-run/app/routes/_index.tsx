@@ -1,11 +1,12 @@
-import { json } from '@remix-run/node';
-import { Form } from '@remix-run/react';
+import { json, LoaderFunctionArgs } from '@remix-run/node';
+import { Await, defer, Form, useLoaderData } from '@remix-run/react';
 import { queryBus, commandBus } from 'missive.js-shared-code-example';
+import { Suspense } from 'react';
 
-export const loader = async () => {
+export const loader = async ({}: LoaderFunctionArgs) => {
     const getUserQuery = queryBus.createQuery('getUser', { email: 'plopix@example.com' });
-    const { result: user } = await queryBus.dispatch(getUserQuery);
-    return json({ user });
+    const promise = queryBus.dispatch(getUserQuery);
+    return defer({ promise });
 };
 
 export const action = async () => {
@@ -21,6 +22,7 @@ export const action = async () => {
 };
 
 export default function Index() {
+    const { promise } = useLoaderData<typeof loader>();
     return (
         <div className="flex h-screen items-center justify-center">
             <div className="flex flex-col items-center gap-16">
@@ -33,6 +35,10 @@ export default function Index() {
                         <img src="/logo-dark.png" alt="Remix" className="hidden w-full dark:block" />
                     </div>
                 </header>
+
+                <Suspense fallback={<div>Loading...</div>}>
+                    <Await resolve={promise}>{({ result }) => <p>{JSON.stringify(result)}</p>}</Await>
+                </Suspense>
 
                 <Form method="post">
                     <button type="submit" className="btn">

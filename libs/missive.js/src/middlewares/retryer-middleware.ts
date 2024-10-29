@@ -1,13 +1,9 @@
 import { Stamp } from '../core/envelope.js';
 import { GenericMiddleware } from '../core/middleware.js';
-import { createExponentialSleeper, createFibonnaciSleeper } from '../utils/sleeper.js';
+import { sleeperFactory } from '../utils/sleeper.js';
+import { RetryConfiguration } from '../utils/types.js';
 
-type Options = {
-    maxAttempts: number;
-    waitingAlgorithm: 'exponential' | 'fibonacci' | 'none';
-    multiplier: number;
-    jitter: number;
-};
+type Options = RetryConfiguration;
 
 export type RetriedStamp = Stamp<{ attempt: number; errorMessage: string }, 'missive:retried'>;
 
@@ -16,14 +12,8 @@ export function createRetryerMiddleware({
     waitingAlgorithm = 'exponential',
     multiplier = 1.5,
     jitter = 0.5,
-}: Partial<Options> = {}): GenericMiddleware {
-    const noneSleeper = () => ({ wait: async () => {}, reset: () => {} });
-    const sleeper =
-        waitingAlgorithm === 'none'
-            ? noneSleeper()
-            : waitingAlgorithm === 'exponential'
-              ? createExponentialSleeper(multiplier, jitter)
-              : createFibonnaciSleeper(jitter);
+}: Options = {}): GenericMiddleware {
+    const sleeper = sleeperFactory({ waitingAlgorithm, multiplier, jitter });
 
     return async (envelope, next) => {
         let attempt = 1;

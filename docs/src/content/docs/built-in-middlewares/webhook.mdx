@@ -1,0 +1,70 @@
+---
+title: Webhook Middleware
+description: Built-in middleware to send webhook notifications with retry.
+---
+
+import { Icon, Aside } from '@astrojs/starlight/components';
+
+The Webhook Middleware is built-in middleware that gives you capability to send the envelope to webhook(s).
+
+## How to use it
+
+As for any Middleware, you can use it by adding it to the `bus` instance.
+
+```typescript
+const webhookMiddleware = createWebhookMiddleware<'command', CommandHandlerRegistry>({
+    async: true,
+    parallel: true,
+    maxAttempts: 3,
+    jitter: 0.5,
+    multiplier: 1.5,
+    waitingAlgorithm: 'exponential',
+    fetcher: fetch,
+    mapping: {
+        createUser: [
+            {
+                url: 'https://webhook.site/c351ab7a-c4cc-4270-9872-48a2d4f67ea4',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                signatureHeader: 'X-Plop-Signature',
+                signature: (payload) => 'signature',
+            }
+        ],
+    },
+});
+const commandBus = createCommandBus<CommandHandlerRegistry>();
+commandBus.use(webhookMiddleware);
+```
+
+### Explanation
+
+The Webooh middleware is simply taking the envelope and send it to the confifured Webhooks. 
+It includes a retry mechanism in case of failure, between each attempt, the middleware is going to wait for a certain amount of time. 
+The `waitingAlgorithm` can be `exponential`, `fibonacci`, or `none`.
+
+- `jitter` is a value between 0 and 1 that will add some randomness to the waiting time.
+- `multiplier` is the factor to multiply the waiting time between each attempt. (only used for `exponential`)
+
+<Aside title="Async mode" type="caution">
+If set in `async` mode, the middleware will not wait for the webhook to respond before continuing the processing, therefore it won't add Stamps.
+</Aside>
+
+## Added Stamps 
+
+The Webhook Middleware is going to add:
+
+    -     
+        ```typescript
+        type WebhookCalledStamp = Stamp<{ attempt: number; text?: string, status?: number }, 'missive:webhook-called'>;
+        ```
+        > Every time the middleware succeed to call the webhook or ultimately at the end of the retries.
+
+
+## Going further
+
+<div class='flex flex-row'>
+    <span className='pr-2'>Look at the code of the </span>
+    <a href="https://github.com/Missive-js/missive.js/tree/main/libs/missive.js/src/middlewares/webhook-middleware.ts" class="contents" target="_blank"><Icon name="github" class="mr-2"/>Webhook Middleware</a>
+</div>

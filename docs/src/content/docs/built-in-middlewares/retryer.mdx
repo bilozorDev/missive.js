@@ -18,8 +18,8 @@ const retryerMiddleware = createRetryerMiddleware({
     multiplier: 1.5;
     jitter: 0.5;
 });
-const queryBus = createQueryBus<QueryHandlerRegistry>();
-queryBus.use(retryerMiddleware);
+const commandBus = createCommandBus<CommandHandlerRegistry>();
+commandBus.use(retryerMiddleware);
 ```
 
 ### Explanation
@@ -45,7 +45,7 @@ The Retryer Middleware is going to add:
         ```typescript
         type RetriedStamp = Stamp<{ attempt: number; errorMessage: string }, 'missive:retried'>;
         ```
-        > Every time the middleware retries the handling of the intent, it will add a `RetriedStamp` to the envelope.
+        > Every time the middleware retries the handling of the intent.
 
 
 ## Going further
