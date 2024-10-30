@@ -1,3 +1,4 @@
+import { createLoggerAdapter } from '../adapters/console-logger-adapter.js';
 import { Envelope, HandledStamp, IdentityStamp, Stamp } from '../core/envelope.js';
 import { GenericMiddleware } from '../core/middleware.js';
 
@@ -6,6 +7,7 @@ export type LoggerAdapter = {
     processed: LogFunction;
     error: LogFunction;
 };
+
 export type LoggerInterface = {
     log: (...args: unknown[]) => void;
     error: (...args: unknown[]) => void;
@@ -37,43 +39,7 @@ export function createLoggerMiddleware({
         logger = console;
     }
     if (!adapter) {
-        adapter = {
-            processing: (identity, message, results, stamps) =>
-                logger.log(
-                    `[Envelope<${identity?.body?.id}>](Processing)`,
-                    JSON.stringify({
-                        message,
-                        results,
-                        stamps,
-                    }),
-                ),
-            processed: (identity, message, results, stamps) => {
-                const timings = stamps.filter((stamp) => stamp.type === 'missive:timings')?.[0] as
-                    | TimingsStamp
-                    | undefined;
-                logger.log(
-                    `[Envelope<${identity?.body?.id}>](Processed${timings?.body?.total ? ` in ${(timings.body.total / 1000000).toFixed(4)} ms` : ''})`,
-                    JSON.stringify({
-                        message,
-                        results,
-                        stamps,
-                    }),
-                );
-            },
-            error: (identity, message, results, stamps) => {
-                const timings = stamps.filter((stamp) => stamp.type === 'missive:timings')?.[0] as
-                    | TimingsStamp
-                    | undefined;
-                logger.error(
-                    `[Envelope<${identity?.body?.id}>](Errored${timings?.body?.total ? ` in ${(timings.body.total / 1000000).toFixed(4)} ms` : ''}`,
-                    JSON.stringify({
-                        message,
-                        results,
-                        stamps,
-                    }),
-                );
-            },
-        };
+        adapter = createLoggerAdapter(logger);
     }
 
     const log = async (step: Step, envelope: Envelope<unknown>) => {

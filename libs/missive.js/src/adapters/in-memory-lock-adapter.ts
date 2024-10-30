@@ -1,4 +1,4 @@
-import { LockAdapter } from './types';
+import { LockAdapter } from '../middlewares/lock-middleware.js';
 
 type LockerInfo = {
     expiresAt: number;

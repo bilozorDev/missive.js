@@ -1,8 +1,12 @@
-import { BusKinds, MessageRegistryType } from '../../core/bus';
+import { BusKinds, MessageRegistryType } from '../core/bus.js';
 
-import { Middleware } from '../../core/middleware';
-import { createInMemoryLockAdapter } from './in-memory-lock';
-import { LockAdapter } from './types';
+import { Middleware } from '../core/middleware.js';
+import { createInMemoryLockAdapter } from '../adapters/in-memory-lock-adapter.js';
+
+export type LockAdapter = {
+    acquire: (key: string, ttl: number) => Promise<boolean>;
+    release: (key: string) => Promise<void>;
+};
 
 type Options<Def> = {
     lockAdapter?: LockAdapter;
@@ -17,7 +21,7 @@ type Params<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> = 
     getLockKey: (envelope: LockMiddlewareMessage<BusKind, T>) => string;
 };
 
-export type LockMiddlewareMessage<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> = Parameters<
+type LockMiddlewareMessage<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> = Parameters<
     Middleware<BusKind, T>
 >[0];
 
