@@ -1,21 +1,27 @@
+import { BusKinds, MessageRegistryType } from '../core/bus.js';
 import { Stamp } from '../core/envelope.js';
-import { GenericMiddleware } from '../core/middleware.js';
-import { sleeperFactory } from '../utils/sleeper.js';
+import { Middleware } from '../core/middleware.js';
+import { buildSleeper, sleeperFactory } from '../utils/sleeper.js';
 import { RetryConfiguration } from '../utils/types.js';
 
-type Options = RetryConfiguration;
-
+type BasicOptions = RetryConfiguration;
+type Options<Def> = BasicOptions & {
+    intents?: Partial<Record<keyof Def, BasicOptions>>;
+};
 export type RetriedStamp = Stamp<{ attempt: number; errorMessage: string }, 'missive:retried'>;
 
-export function createRetryerMiddleware({
-    maxAttempts = 3,
-    waitingAlgorithm = 'exponential',
-    multiplier = 1.5,
-    jitter = 0.5,
-}: Options = {}): GenericMiddleware {
-    const sleeper = sleeperFactory({ waitingAlgorithm, multiplier, jitter });
-
+export function createRetryerMiddleware<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>>(
+    options: Options<T> = {},
+): Middleware<BusKind, T> {
+    const defaultSleeper = buildSleeper(options);
+    const sleeperRegistry: Record<string, ReturnType<typeof sleeperFactory>> = {};
     return async (envelope, next) => {
+        const type = envelope.message.__type;
+        if (options?.intents?.[type] && !sleeperRegistry[type]) {
+            sleeperRegistry[type] = buildSleeper(options.intents[type]);
+        }
+        const maxAttempts = options.intents?.[type]?.maxAttempts || options.maxAttempts || 3;
+        const sleeper = sleeperRegistry[type] || defaultSleeper;
         let attempt = 1;
         sleeper.reset();
         let lastError: unknown | null = null;

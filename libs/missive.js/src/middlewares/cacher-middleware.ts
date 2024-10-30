@@ -20,21 +20,27 @@ const hashKey = async (data: string): Promise<string> => {
         .join('');
 };
 
-type Options = {
-    adapter: CacherAdapter;
+type BasicOptions = {
     cache?: 'all' | 'only-cacheable';
     defaultTtl?: number;
 };
 
+type Options<Def> = BasicOptions & {
+    adapter: CacherAdapter;
+    intents?: Partial<Record<keyof Def, BasicOptions>>;
+};
+
 export function createCacherMiddleware<T extends QueryMessageRegistryType>({
     adapter,
+    intents,
     cache = 'all',
     defaultTtl = 3600,
-}: Partial<Options> = {}): Middleware<'query', T> {
+}: Partial<Options<T>> = {}): Middleware<'query', T> {
     if (!adapter) {
         adapter = createMemoryCacheAdapter();
     }
     return async (envelope, next) => {
+        const type = envelope.message.__type;
         const key = await hashKey(JSON.stringify(envelope.message));
         const cached = await adapter.get(key);
         if (cached) {
@@ -46,9 +52,10 @@ export function createCacherMiddleware<T extends QueryMessageRegistryType>({
         await next();
         const result = envelope.lastStamp<HandledStamp<unknown>>('missive:handled');
         const cacheableStamp = envelope.firstStamp<CacheableStamp>('missive:cacheable');
-
-        if (cacheableStamp || cache === 'all' || (cache === 'only-cacheable' && cacheableStamp)) {
-            await adapter.set(key, result?.body, cacheableStamp?.body?.ttl || defaultTtl);
+        const ttl = intents?.[type]?.defaultTtl ?? defaultTtl;
+        const caching = intents?.[type]?.cache ?? cache;
+        if (caching === 'all' || (caching === 'only-cacheable' && cacheableStamp)) {
+            await adapter.set(key, result?.body, cacheableStamp?.body?.ttl || ttl);
         }
     };
 }

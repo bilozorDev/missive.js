@@ -1,6 +1,7 @@
 import { createLoggerAdapter } from '../adapters/console-logger-adapter.js';
+import { BusKinds, MessageRegistryType } from '../core/bus.js';
 import { Envelope, HandledStamp, IdentityStamp, Stamp } from '../core/envelope.js';
-import { GenericMiddleware } from '../core/middleware.js';
+import { Middleware } from '../core/middleware.js';
 
 export type LoggerAdapter = {
     processing: LogFunction;
@@ -23,18 +24,24 @@ type LogFunction = <M, R>(
     stamps: Stamp[],
 ) => void | Promise<void>;
 
-type Options = {
+type BasicOptions = {
+    collect?: boolean;
+    async?: boolean;
+};
+
+type Options<Def> = BasicOptions & {
     adapter: LoggerAdapter;
     logger: LoggerInterface;
-    collect: boolean;
-    async: boolean;
+    intents?: Partial<Record<keyof Def, BasicOptions>>;
 };
-export function createLoggerMiddleware({
+
+export function createLoggerMiddleware<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>>({
     adapter,
     logger,
+    intents,
     collect = false,
     async = false,
-}: Partial<Options> = {}): GenericMiddleware {
+}: Partial<Options<T>> = {}): Middleware<BusKind, T> {
     if (!logger) {
         logger = console;
     }
@@ -42,7 +49,7 @@ export function createLoggerMiddleware({
         adapter = createLoggerAdapter(logger);
     }
 
-    const log = async (step: Step, envelope: Envelope<unknown>) => {
+    const log = async (step: Step, envelope: Envelope<unknown>, doAsync: boolean) => {
         const identity = envelope.firstStamp<IdentityStamp>('missive:identity');
         const results = envelope.stampsOfType<HandledStamp<unknown>>('missive:handled');
         const promise = adapter[step](
@@ -51,10 +58,10 @@ export function createLoggerMiddleware({
             results,
             envelope.stamps.filter((stamp) => stamp.type !== 'missive:identity' && stamp.type !== 'missive:handled'),
         );
-        if (collect) {
+        if (doAsync) {
             return promise;
         }
-        if (!async && promise instanceof Promise) {
+        if (!doAsync && promise instanceof Promise) {
             await promise;
         }
     };
@@ -68,32 +75,36 @@ export function createLoggerMiddleware({
 
     return async (envelope, next) => {
         const startTime = performance.now();
-        if (!collect) {
-            await log('processing', envelope);
+        const type = envelope.message.__type;
+        const doCollect = intents?.[type]?.collect ?? collect;
+        const doAsync = intents?.[type]?.async ?? async;
+
+        if (!doCollect) {
+            await log('processing', envelope, doAsync);
             try {
                 await next();
                 attachNanoTimingStamp(startTime, envelope);
-                await log('processed', envelope);
+                await log('processed', envelope, doAsync);
             } catch (error) {
                 attachNanoTimingStamp(startTime, envelope);
-                await log('error', envelope);
+                await log('error', envelope, doAsync);
                 throw error;
             }
             return;
         }
         const logs: Array<() => Promise<void>> = [];
-        logs.push(() => log('processing', envelope));
+        logs.push(() => log('processing', envelope, doAsync));
         try {
             await next();
             attachNanoTimingStamp(startTime, envelope);
-            logs.push(() => log('processed', envelope));
+            logs.push(() => log('processed', envelope, doAsync));
         } catch (error) {
             attachNanoTimingStamp(startTime, envelope);
-            logs.push(() => log('error', envelope));
+            logs.push(() => log('error', envelope, doAsync));
             throw error;
         } finally {
             const allLogs = Promise.allSettled(logs.map((log) => log()));
-            if (!async) {
+            if (!doAsync) {
                 await allLogs;
             }
         }

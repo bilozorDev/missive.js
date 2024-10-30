@@ -5,6 +5,7 @@ import {
     createQueryBus,
     createRetryerMiddleware,
     createWebhookMiddleware,
+    QueryHandlerDefinition,
 } from 'missive.js';
 import {
     CommandBus,
@@ -26,10 +27,28 @@ import { QueryBus } from '../domain/contracts/bus.js';
 import { createGetOrdersHandler, getOrdersQuerySchema } from '../domain/use-cases/get-orders.js';
 
 // Built-in Logger Middleware Adapter
-const missiveLoggerMiddleware = MissiveCreateLoggerMiddleware({
+const QueryMissiveLoggerMiddleware = MissiveCreateLoggerMiddleware<'query', QueryHandlerRegistry>({
     collect: false,
     async: false,
+    intents: {
+        getOrders: { collect: true },
+    },
 });
+const CommandMissiveLoggerMiddleware = MissiveCreateLoggerMiddleware<'command', CommandHandlerRegistry>({
+    collect: false,
+    async: false,
+    intents: {
+        removeUser: { collect: true, async: true },
+    },
+});
+const EventMissiveLoggerMiddleware = MissiveCreateLoggerMiddleware<'event', EventHandlerRegistry>({
+    collect: false,
+    async: false,
+    intents: {
+        userCreated: { collect: true },
+    },
+});
+
 // Built-in Cacher Middleware Adapter
 const cacherMiddleware = createCacherMiddleware<QueryHandlerRegistry>({ cache: 'all', defaultTtl: 3600 });
 
@@ -37,20 +56,20 @@ const cacherMiddleware = createCacherMiddleware<QueryHandlerRegistry>({ cache: '
 const loggerMiddleware = createLoggerMiddleware();
 
 const queryBus: QueryBus = createQueryBus<QueryHandlerRegistry>();
-queryBus.use(missiveLoggerMiddleware);
+queryBus.use(QueryMissiveLoggerMiddleware);
 queryBus.use(cacherMiddleware);
 queryBus.use(loggerMiddleware);
 queryBus.register('getUser', getUserQuerySchema, createGetUserHandler({}));
 queryBus.register('getOrders', getOrdersQuerySchema, createGetOrdersHandler({}));
 
 const eventBus: EventBus = createEventBus<EventHandlerRegistry>();
-eventBus.use(missiveLoggerMiddleware);
+eventBus.use(EventMissiveLoggerMiddleware);
 eventBus.use(loggerMiddleware);
 eventBus.register('userCreated', userCreatedEventSchema, createUserCreatedHandler({}));
 eventBus.register('userCreated', userCreatedEventSchema, createUserCreatedHandler2({}));
 eventBus.register('userRemoved', userRemovedEventSchema, createUserRemovedHandler({}));
 
-const retryerMiddleware = createRetryerMiddleware();
+// const retryerMiddleware = createRetryerMiddleware();
 const webhookMiddleware = createWebhookMiddleware<'command', CommandHandlerRegistry>({
     async: true,
     parallel: true,
@@ -59,27 +78,29 @@ const webhookMiddleware = createWebhookMiddleware<'command', CommandHandlerRegis
     multiplier: 1.5,
     waitingAlgorithm: 'exponential',
     fetcher: fetch,
-    mapping: {
-        createUser: [
-            {
-                url: 'https://webhook.site/c351ab7a-c4cc-4270-9872-48a2d4f67ea4',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+    intents: {
+        createUser: {
+            endpoints: [
+                {
+                    url: 'https://webhook.site/c351ab7a-c4cc-4270-9872-48a2d4f67ea4',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    signatureHeader: 'X-Plop-Signature',
+                    signature: (payload) => 'signature',
                 },
-                signatureHeader: 'X-Plop-Signature',
-                signature: (payload) => 'signature',
-            },
-        ],
+            ],
+        },
     },
 });
 const commandBus: CommandBus = createCommandBus<CommandHandlerRegistry>({
     middlewares: [
         webhookMiddleware,
-        missiveLoggerMiddleware,
+        CommandMissiveLoggerMiddleware,
         loggerMiddleware,
         createEventsMiddleware(eventBus),
-        retryerMiddleware,
+        // retryerMiddleware,
     ],
     handlers: [
         { messageName: 'createUser', schema: createUserCommandSchema, handler: createCreateUserHandler({}) },

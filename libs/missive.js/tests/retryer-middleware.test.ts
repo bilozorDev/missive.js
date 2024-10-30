@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createRetryerMiddleware, RetriedStamp } from '../src/middlewares/retryer-middleware';
 import { createEnvelope, Envelope } from '../src/core/envelope';
+import { TypedMessage } from '../src/core/bus';
 
 describe('createRetryerMiddleware', () => {
     let nextMock: ReturnType<typeof vi.fn>;
-    let envelope: Envelope<unknown>;
+    let envelope: Envelope<TypedMessage<unknown>>;
 
     beforeEach(() => {
         nextMock = vi.fn();
-        envelope = createEnvelope('test message');
+        envelope = {
+            ...createEnvelope('test message'),
+            __type: 'test-message',
+        } as unknown as Envelope<TypedMessage<unknown>>;
     });
 
     it('should retry the correct number of times with none algorithm', async () => {

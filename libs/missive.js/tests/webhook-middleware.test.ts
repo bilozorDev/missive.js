@@ -26,23 +26,26 @@ describe('createWebhookMiddleware', () => {
     it('should call webhook endpoints in parallel', async () => {
         const middleware = createWebhookMiddleware<'command', MessageRegistryType<'command'>>({
             waitingAlgorithm: 'none',
-            mapping: {
-                'test-message': [
-                    {
-                        url: 'https://example.com/webhook1',
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signatureHeader: 'X-Signature',
-                        signature: () => 'signature1',
-                    },
-                    {
-                        url: 'https://example.com/webhook2',
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signatureHeader: 'X-Signature',
-                        signature: () => 'signature2',
-                    },
-                ],
+            intents: {
+                'test-message': {
+                    async: false,
+                    endpoints: [
+                        {
+                            url: 'https://example.com/webhook1',
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            signatureHeader: 'X-Signature',
+                            signature: () => 'signature1',
+                        },
+                        {
+                            url: 'https://example.com/webhook2',
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            signatureHeader: 'X-Signature',
+                            signature: () => 'signature2',
+                        },
+                    ],
+                },
             },
             async: false,
             parallel: true,
@@ -63,23 +66,25 @@ describe('createWebhookMiddleware', () => {
     it('should call webhook endpoints sequentially', async () => {
         const middleware = createWebhookMiddleware<'command', MessageRegistryType<'command'>>({
             waitingAlgorithm: 'none',
-            mapping: {
-                'test-message': [
-                    {
-                        url: 'https://example.com/webhook1',
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signatureHeader: 'X-Signature',
-                        signature: () => 'signature1',
-                    },
-                    {
-                        url: 'https://example.com/webhook2',
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signatureHeader: 'X-Signature',
-                        signature: () => 'signature2',
-                    },
-                ],
+            intents: {
+                'test-message': {
+                    endpoints: [
+                        {
+                            url: 'https://example.com/webhook1',
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            signatureHeader: 'X-Signature',
+                            signature: () => 'signature1',
+                        },
+                        {
+                            url: 'https://example.com/webhook2',
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            signatureHeader: 'X-Signature',
+                            signature: () => 'signature2',
+                        },
+                    ],
+                },
             },
             async: false,
             parallel: false,
@@ -106,16 +111,18 @@ describe('createWebhookMiddleware', () => {
 
         const middleware = createWebhookMiddleware<'command', MessageRegistryType<'command'>>({
             waitingAlgorithm: 'none',
-            mapping: {
-                'test-message': [
-                    {
-                        url: 'https://example.com/webhook1',
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signatureHeader: 'X-Signature',
-                        signature: () => 'signature1',
-                    },
-                ],
+            intents: {
+                'test-message': {
+                    endpoints: [
+                        {
+                            url: 'https://example.com/webhook1',
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            signatureHeader: 'X-Signature',
+                            signature: () => 'signature1',
+                        },
+                    ],
+                },
             },
             async: false,
             parallel: true,
@@ -136,16 +143,18 @@ describe('createWebhookMiddleware', () => {
     it('should add correct stamps to the envelope', async () => {
         const middleware = createWebhookMiddleware<'command', MessageRegistryType<'command'>>({
             waitingAlgorithm: 'none',
-            mapping: {
-                'test-message': [
-                    {
-                        url: 'https://example.com/webhook1',
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signatureHeader: 'X-Signature',
-                        signature: () => 'signature1',
-                    },
-                ],
+            intents: {
+                'test-message': {
+                    endpoints: [
+                        {
+                            url: 'https://example.com/webhook1',
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            signatureHeader: 'X-Signature',
+                            signature: () => 'signature1',
+                        },
+                    ],
+                },
             },
             async: false,
             parallel: true,

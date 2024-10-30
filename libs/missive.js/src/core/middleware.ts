@@ -5,6 +5,3 @@ export type Middleware<BusKind extends BusKinds, HandlerDefinitions extends Mess
     envelope: Envelope<TypedMessage<MessageRegistry<BusKind, HandlerDefinitions>>>,
     next: () => Promise<void>,
 ) => Promise<void>;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type GenericMiddleware = Middleware<BusKinds, any>;

@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createLoggerMiddleware, LoggerAdapter } from '../src/middlewares/logger-middleware';
 import { Envelope } from '../src/core/envelope';
+import { TypedMessage } from '../src/core/bus';
 
 describe('createLoggerMiddleware', () => {
     let adapter: LoggerAdapter;
     let middleware: ReturnType<typeof createLoggerMiddleware>;
-    let envelope: Envelope<unknown>;
+    let envelope: Envelope<TypedMessage<unknown>>;
     let next: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
@@ -20,7 +21,7 @@ describe('createLoggerMiddleware', () => {
             addStamp: vi.fn(),
             firstStamp: vi.fn().mockReturnValue(undefined),
             stampsOfType: vi.fn().mockReturnValue([]),
-        } as unknown as Envelope<unknown>;
+        } as unknown as Envelope<TypedMessage<unknown>>;
         next = vi.fn();
     });
 

@@ -1,7 +1,7 @@
 import { BusKinds, MessageRegistryType } from '../core/bus.js';
 import { Envelope, Stamp } from '../core/envelope.js';
 import { Middleware } from '../core/middleware.js';
-import { sleeperFactory } from '../utils/sleeper.js';
+import { buildSleeper, Sleeper, sleeperFactory } from '../utils/sleeper.js';
 import { RetryConfiguration } from '../utils/types.js';
 
 type WebhookEndpoint = {
@@ -11,26 +11,25 @@ type WebhookEndpoint = {
     signatureHeader: string;
     signature: (payload: string) => string;
 };
-type Options<Def> = RetryConfiguration & {
-    mapping: Partial<Record<keyof Def, WebhookEndpoint[]>>;
+
+type BasicOptions = RetryConfiguration & {
     async?: boolean;
     parallel?: boolean;
+    endpoints: WebhookEndpoint[];
+};
+
+type Options<Def> = BasicOptions & {
+    intents: Partial<Record<keyof Def, BasicOptions>>;
     fetcher?: typeof fetch;
 };
 
 export type WebhookCalledStamp = Stamp<{ attempt: number; text?: string; status?: number }, 'missive:webhook-called'>;
-export function createWebhookMiddleware<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>>({
-    mapping,
-    async = false,
-    parallel = true,
-    maxAttempts = 3,
-    jitter = 0.5,
-    multiplier = 1.5,
-    waitingAlgorithm = 'exponential',
-    fetcher,
-}: Partial<Options<T>> = {}): Middleware<BusKind, T> {
-    const fetchFn = fetcher || fetch;
-    const sleeper = sleeperFactory({ waitingAlgorithm, multiplier, jitter });
+export function createWebhookMiddleware<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>>(
+    options: Partial<Options<T>> = {},
+): Middleware<BusKind, T> {
+    const fetchFn = options.fetcher || fetch;
+    const defaultSleeper = buildSleeper(options);
+    const sleeperRegistry: Record<string, ReturnType<typeof sleeperFactory>> = {};
 
     const callEndpoint = async (endpoint: WebhookEndpoint, envelope: Envelope<unknown>) => {
         const body = JSON.stringify(envelope);
@@ -50,7 +49,12 @@ export function createWebhookMiddleware<BusKind extends BusKinds, T extends Mess
         };
     };
 
-    const callEndpointsInParallel = async (endpoints: WebhookEndpoint[], envelope: Envelope<unknown>) => {
+    const callEndpointsInParallel = async (
+        endpoints: WebhookEndpoint[],
+        envelope: Envelope<unknown>,
+        sleeper: Sleeper,
+        maxAttempts: number,
+    ) => {
         let indexedEndpoints = endpoints.map((endpoint, index) => ({
             text: undefined,
             status: undefined,
@@ -93,7 +97,12 @@ export function createWebhookMiddleware<BusKind extends BusKinds, T extends Mess
         });
     };
 
-    const callEndpointsSequentially = async (endpoints: WebhookEndpoint[], envelope: Envelope<unknown>) => {
+    const callEndpointsSequentially = async (
+        endpoints: WebhookEndpoint[],
+        envelope: Envelope<unknown>,
+        sleeper: Sleeper,
+        maxAttempts: number,
+    ) => {
         const indexedEndpoints: {
             text?: string;
             status?: number;
@@ -129,20 +138,28 @@ export function createWebhookMiddleware<BusKind extends BusKinds, T extends Mess
     return async (envelope, next) => {
         await next();
         const type = envelope.message.__type;
-        if (mapping && mapping[type]) {
-            const endpoints = mapping[type];
+        if (options?.intents?.[type] && !sleeperRegistry[type]) {
+            sleeperRegistry[type] = buildSleeper(options.intents[type]);
+        }
+        const maxAttempts = options.intents?.[type]?.maxAttempts || options.maxAttempts || 3;
+        const sleeper = sleeperRegistry[type] || defaultSleeper;
+        const parallel = options.intents?.[type]?.parallel ?? options.parallel;
+        const async = options.intents?.[type]?.async ?? options.async;
+
+        if (options.intents?.[type]) {
+            const endpoints = options.intents[type].endpoints;
             const results = await (async () => {
                 if (parallel) {
                     if (!async) {
-                        return await callEndpointsInParallel(endpoints, envelope);
+                        return await callEndpointsInParallel(endpoints, envelope, sleeper, maxAttempts);
                     }
-                    callEndpointsInParallel(endpoints, envelope);
+                    callEndpointsInParallel(endpoints, envelope, sleeper, maxAttempts);
                     return [];
                 }
                 if (!async) {
-                    return await callEndpointsSequentially(endpoints, envelope);
+                    return await callEndpointsSequentially(endpoints, envelope, sleeper, maxAttempts);
                 }
-                callEndpointsSequentially(endpoints, envelope);
+                callEndpointsSequentially(endpoints, envelope, sleeper, maxAttempts);
                 return [];
             })();
             for (const result of results) {

@@ -8,13 +8,15 @@ export type LockAdapter = {
     release: (key: string) => Promise<void>;
 };
 
-type Options<Def> = {
-    lockAdapter?: LockAdapter;
-    tickInMs?: number;
-    timeoutToAcquireLock?: number;
+type BasicOptions = {
+    ttl?: number;
+    timeout?: number;
+    tick?: number;
+};
 
-    defaultTtl?: number;
-    mappingToTtl: Record<keyof Def, number>;
+type Options<Def> = BasicOptions & {
+    adapter: LockAdapter;
+    intents?: Partial<Record<keyof Def, BasicOptions>>;
 };
 
 type Params<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> = {
@@ -27,21 +29,16 @@ type LockMiddlewareMessage<BusKind extends BusKinds, T extends MessageRegistryTy
 
 export function createLockMiddleware<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>>(
     { getLockKey }: Params<BusKind, T>,
-    {
-        lockAdapter,
-        tickInMs: tick = 1000,
-        timeoutToAcquireLock: timeoutAcquireLock,
-        defaultTtl = 500,
-        mappingToTtl,
-    }: Partial<Options<T>> = {},
+    options: Partial<Options<T>> = {},
 ): Middleware<BusKind, T> {
-    const adapter = lockAdapter ?? createInMemoryLockAdapter();
+    const adapter = options.adapter ?? createInMemoryLockAdapter();
 
     return async (envelope, next) => {
+        const type = envelope.message.__type;
+        const ttl = options.intents?.[type]?.ttl ?? options.ttl ?? 500;
+        const tick = options.intents?.[type]?.tick ?? options.tick ?? 100;
+        const lockKey = getLockKey(envelope);
         async function doUnderLock(timeout: number) {
-            const type = envelope.message.__type;
-            const ttl = mappingToTtl?.[type] ?? defaultTtl;
-            const lockKey = getLockKey(envelope);
             const isAcquired = await adapter.acquire(lockKey, ttl);
             if (isAcquired) {
                 try {
@@ -61,7 +58,6 @@ export function createLockMiddleware<BusKind extends BusKinds, T extends Message
                 throw new Error('Lock not acquired or timeout');
             }
         }
-
-        await doUnderLock(Date.now() + (timeoutAcquireLock ?? 0));
+        await doUnderLock(Date.now() + (options.intents?.[type]?.timeout ?? options.timeout ?? 5000));
     };
 }

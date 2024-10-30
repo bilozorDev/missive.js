@@ -83,6 +83,11 @@ serve-astro-example: ## Run the Astro Example
 serve-nextjs-example: ## Run the Next JS Example
 	@$(PACKAGE_MANAGER) run dev --filter=missive.js-nextjs-example
 
+.PHONY: serve-fancy-demo-on
+serve-fancy-demo-on: ## Run Fancy Demo One
+	@$(PACKAGE_MANAGER) run dev --filter=missive.js-fancy-demo-one
+
+
 .PHONY: release
 release: ## Create a Realease (tag and push)
 	@git tag -s -a v$(MISSIVEJS_VERSION) -m "v$(MISSIVEJS_VERSION)"
