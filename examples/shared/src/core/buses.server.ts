@@ -1,12 +1,4 @@
-import {
-    createCacherMiddleware,
-    createCommandBus,
-    createEventBus,
-    createQueryBus,
-    createRetryerMiddleware,
-    createWebhookMiddleware,
-    QueryHandlerDefinition,
-} from 'missive.js';
+import { createCommandBus, createEventBus, createQueryBus, createWebhookMiddleware } from 'missive.js';
 import {
     CommandBus,
     CommandHandlerRegistry,
@@ -22,55 +14,41 @@ import { createRemoveUserHandler, removeUserCommandSchema } from '../domain/use-
 import { createUserCreatedHandler, userCreatedEventSchema } from '../domain/use-cases/user-created.js';
 import { createUserCreatedHandler2 } from '../domain/use-cases/user-created2.js';
 import { createUserRemovedHandler, userRemovedEventSchema } from '../domain/use-cases/user-removed.js';
-import { createLoggerMiddleware as MissiveCreateLoggerMiddleware } from 'missive.js';
 import { QueryBus } from '../domain/contracts/bus.js';
 import { createGetOrdersHandler, getOrdersQuerySchema } from '../domain/use-cases/get-orders.js';
-
-// Built-in Logger Middleware Adapter
-const QueryMissiveLoggerMiddleware = MissiveCreateLoggerMiddleware<'query', QueryHandlerRegistry>({
-    collect: false,
-    async: false,
-    intents: {
-        getOrders: { collect: true },
-    },
-});
-const CommandMissiveLoggerMiddleware = MissiveCreateLoggerMiddleware<'command', CommandHandlerRegistry>({
-    collect: false,
-    async: false,
-    intents: {
-        removeUser: { collect: true, async: true },
-    },
-});
-const EventMissiveLoggerMiddleware = MissiveCreateLoggerMiddleware<'event', EventHandlerRegistry>({
-    collect: false,
-    async: false,
-    intents: {
-        userCreated: { collect: true },
-    },
-});
-
-// Built-in Cacher Middleware Adapter
-const cacherMiddleware = createCacherMiddleware<QueryHandlerRegistry>({ cache: 'all', defaultTtl: 3600 });
 
 // Project Logger Middleware Adapter
 const loggerMiddleware = createLoggerMiddleware();
 
 const queryBus: QueryBus = createQueryBus<QueryHandlerRegistry>();
-queryBus.use(QueryMissiveLoggerMiddleware);
-queryBus.use(cacherMiddleware);
+queryBus.useLoggerMiddleware();
+queryBus.useCacherMiddleware();
 queryBus.use(loggerMiddleware);
 queryBus.register('getUser', getUserQuerySchema, createGetUserHandler({}));
 queryBus.register('getOrders', getOrdersQuerySchema, createGetOrdersHandler({}));
 
 const eventBus: EventBus = createEventBus<EventHandlerRegistry>();
-eventBus.use(EventMissiveLoggerMiddleware);
+eventBus.useLoggerMiddleware({
+    intents: {
+        userCreated: {
+            async: true,
+        },
+    },
+});
 eventBus.use(loggerMiddleware);
 eventBus.register('userCreated', userCreatedEventSchema, createUserCreatedHandler({}));
 eventBus.register('userCreated', userCreatedEventSchema, createUserCreatedHandler2({}));
 eventBus.register('userRemoved', userRemovedEventSchema, createUserRemovedHandler({}));
 
-// const retryerMiddleware = createRetryerMiddleware();
-const webhookMiddleware = createWebhookMiddleware<'command', CommandHandlerRegistry>({
+const commandBus: CommandBus = createCommandBus<CommandHandlerRegistry>({
+    middlewares: [loggerMiddleware, createEventsMiddleware(eventBus)],
+    handlers: [
+        { messageName: 'createUser', schema: createUserCommandSchema, handler: createCreateUserHandler({}) },
+        { messageName: 'removeUser', schema: removeUserCommandSchema, handler: createRemoveUserHandler({}) },
+    ],
+});
+commandBus.useLoggerMiddleware();
+commandBus.useWebhookMiddleware({
     async: true,
     parallel: true,
     maxAttempts: 3,
@@ -93,19 +71,6 @@ const webhookMiddleware = createWebhookMiddleware<'command', CommandHandlerRegis
             ],
         },
     },
-});
-const commandBus: CommandBus = createCommandBus<CommandHandlerRegistry>({
-    middlewares: [
-        webhookMiddleware,
-        CommandMissiveLoggerMiddleware,
-        loggerMiddleware,
-        createEventsMiddleware(eventBus),
-        // retryerMiddleware,
-    ],
-    handlers: [
-        { messageName: 'createUser', schema: createUserCommandSchema, handler: createCreateUserHandler({}) },
-        { messageName: 'removeUser', schema: removeUserCommandSchema, handler: createRemoveUserHandler({}) },
-    ],
 });
 
 export { queryBus, commandBus, eventBus };

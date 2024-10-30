@@ -3,6 +3,11 @@ import { createEnvelope, HandledStamp, IdentityStamp, type Envelope } from './en
 import type { Prettify, ReplaceKeys } from '../utils/types.js';
 import type { Middleware } from './middleware.js';
 import { nanoid } from 'nanoid';
+import { createLoggerMiddleware } from '../middlewares/logger-middleware.js';
+import { createCacherMiddleware } from '../middlewares/cacher-middleware.js';
+import { createRetryerMiddleware } from '../middlewares/retryer-middleware.js';
+import { createWebhookMiddleware } from '../middlewares/webhook-middleware.js';
+import { createLockMiddleware } from '../middlewares/lock-middleware.js';
 
 export type BusKinds = 'query' | 'command' | 'event';
 export type MessageRegistryType<BusKind extends BusKinds> = Record<string, HandlerDefinition<BusKind>>;
@@ -71,7 +76,13 @@ type MissiveBus<BusKind extends BusKinds, HandlerDefinitions extends MessageRegi
 type MissiveCommandBus<HandlerDefinitions extends CommandMessageRegistryType> = ReplaceKeys<
     MissiveBus<'command', HandlerDefinitions>,
     { createCommand: 'createIntent' }
->;
+> & {
+    useLoggerMiddleware: (...props: Parameters<typeof createLoggerMiddleware<'command', HandlerDefinitions>>) => void;
+    useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'command', HandlerDefinitions>>) => void;
+    useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'command', HandlerDefinitions>>) => void;
+    useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'command', HandlerDefinitions>>) => void;
+};
+
 export type CommandBus<HandlerDefinitions extends CommandMessageRegistryType> = Prettify<
     MissiveCommandBus<HandlerDefinitions>
 >;
@@ -79,7 +90,13 @@ export type CommandBus<HandlerDefinitions extends CommandMessageRegistryType> = 
 type MissiveQueryBus<HandlerDefinitions extends QueryMessageRegistryType> = ReplaceKeys<
     MissiveBus<'query', HandlerDefinitions>,
     { createQuery: 'createIntent' }
->;
+> & {
+    useLoggerMiddleware: (...props: Parameters<typeof createLoggerMiddleware<'query', HandlerDefinitions>>) => void;
+    useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'query', HandlerDefinitions>>) => void;
+    useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'query', HandlerDefinitions>>) => void;
+    useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'query', HandlerDefinitions>>) => void;
+    useCacherMiddleware: (...props: Parameters<typeof createCacherMiddleware<HandlerDefinitions>>) => void;
+};
 export type QueryBus<HandlerDefinitions extends QueryMessageRegistryType> = Prettify<
     MissiveQueryBus<HandlerDefinitions>
 >;
@@ -87,7 +104,12 @@ export type QueryBus<HandlerDefinitions extends QueryMessageRegistryType> = Pret
 type MissiveEventBus<HandlerDefinitions extends EventMessageRegistryType> = ReplaceKeys<
     MissiveBus<'event', HandlerDefinitions>,
     { createEvent: 'createIntent' }
->;
+> & {
+    useLoggerMiddleware: (...props: Parameters<typeof createLoggerMiddleware<'event', HandlerDefinitions>>) => void;
+    useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'event', HandlerDefinitions>>) => void;
+    useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'event', HandlerDefinitions>>) => void;
+    useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'event', HandlerDefinitions>>) => void;
+};
 export type EventBus<HandlerDefinitions extends EventMessageRegistryType> = Prettify<
     MissiveEventBus<HandlerDefinitions>
 >;
@@ -231,6 +253,18 @@ export const createCommandBus = <HandlerDefinitions extends CommandMessageRegist
 
     return {
         use: (middleware: Middleware<'command', HandlerDefinitions>) => commandBus.use(middleware),
+        useLoggerMiddleware: (...props: Parameters<typeof createLoggerMiddleware<'command', HandlerDefinitions>>) => {
+            commandBus.use(createLoggerMiddleware(...props));
+        },
+        useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'command', HandlerDefinitions>>) => {
+            commandBus.use(createLockMiddleware(...props));
+        },
+        useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'command', HandlerDefinitions>>) => {
+            commandBus.use(createRetryerMiddleware(...props));
+        },
+        useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'command', HandlerDefinitions>>) => {
+            commandBus.use(createWebhookMiddleware(...props));
+        },
         register: commandBus.register,
         dispatch: commandBus.dispatch,
         createCommand: commandBus.createIntent,
@@ -245,6 +279,21 @@ export const createQueryBus = <HandlerDefinitions extends QueryMessageRegistryTy
 
     return {
         use: (middleware: Middleware<'query', HandlerDefinitions>) => queryBus.use(middleware),
+        useLoggerMiddleware: (...props: Parameters<typeof createLoggerMiddleware<'query', HandlerDefinitions>>) => {
+            queryBus.use(createLoggerMiddleware(...props));
+        },
+        useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'query', HandlerDefinitions>>) => {
+            queryBus.use(createLockMiddleware(...props));
+        },
+        useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'query', HandlerDefinitions>>) => {
+            queryBus.use(createRetryerMiddleware(...props));
+        },
+        useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'query', HandlerDefinitions>>) => {
+            queryBus.use(createWebhookMiddleware(...props));
+        },
+        useCacherMiddleware: (...props: Parameters<typeof createCacherMiddleware<HandlerDefinitions>>) => {
+            queryBus.use(createCacherMiddleware(...props));
+        },
         register: queryBus.register,
         dispatch: queryBus.dispatch,
         createQuery: queryBus.createIntent,
@@ -256,9 +305,20 @@ export const createEventBus = <HandlerDefinitions extends EventMessageRegistryTy
     handlers?: HandlerConfig<'event', HandlerDefinitions>[];
 }): MissiveEventBus<HandlerDefinitions> => {
     const eventBus = createBus<'event', HandlerDefinitions>(args);
-
     return {
         use: (middleware: Middleware<'event', HandlerDefinitions>) => eventBus.use(middleware),
+        useLoggerMiddleware: (...props: Parameters<typeof createLoggerMiddleware<'event', HandlerDefinitions>>) => {
+            eventBus.use(createLoggerMiddleware(...props));
+        },
+        useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'event', HandlerDefinitions>>) => {
+            eventBus.use(createLockMiddleware(...props));
+        },
+        useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'event', HandlerDefinitions>>) => {
+            eventBus.use(createRetryerMiddleware(...props));
+        },
+        useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'event', HandlerDefinitions>>) => {
+            eventBus.use(createWebhookMiddleware(...props));
+        },
         register: eventBus.register,
         dispatch: eventBus.dispatch,
         createEvent: eventBus.createIntent,
