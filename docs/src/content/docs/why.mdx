@@ -49,6 +49,7 @@ centralized system for handling Commands, Queries, and Events, allowing you to b
 
 And on top of what you can do on your own, Missive.js provides a set of built-in middlewares to handle common concerns like:
 -  [**Caching**](/missive.js/built-in-middlewares/cacher): Cache the results of queries to speed up your application.
+-  [**Lock**](/missive.js/built-in-middlewares/lock): Lock the processing of a message based on something in the intent itself.
 -  [**Retryer**](/missive.js/built-in-middlewares/retryer): Retry handling if an error occurs.
 -  [**Webhook**](/missive.js/built-in-middlewares/webhook): Send the envelope to webhook(s).
 -  [**Logger**](/missive.js/built-in-middlewares/logger): Log the messages and the full Envelope (with the Stamps) before and once handled (or errored) in the backend of your choice.
