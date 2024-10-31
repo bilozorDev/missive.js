@@ -12,7 +12,8 @@ The Webhook Middleware is built-in middleware that gives you capability to send 
 As for any Middleware, you can use it by adding it to the `bus` instance.
 
 ```typescript
-const webhookMiddleware = createWebhookMiddleware<'command', CommandHandlerRegistry>({
+const commandBus = createCommandBus<CommandHandlerRegistry>();
+commandBus.useWebhookMiddleware({
     async: true,
     parallel: true,
     maxAttempts: 3,
@@ -34,9 +35,9 @@ const webhookMiddleware = createWebhookMiddleware<'command', CommandHandlerRegis
         ],
     },
 });
-const commandBus = createCommandBus<CommandHandlerRegistry>();
-commandBus.use(webhookMiddleware);
 ```
+
+> Remember built-in middlewares are _intent_ aware, therefore you can customize the behavior per intent using the key `intents`.
 
 ### Explanation
 

@@ -58,6 +58,9 @@ commandBus.useWebhookMiddleware({
     fetcher: fetch,
     intents: {
         createUser: {
+            async: false,
+            parallel: false,
+            jitter: 0.25,
             endpoints: [
                 {
                     url: 'https://webhook.site/c351ab7a-c4cc-4270-9872-48a2d4f67ea4',

@@ -12,24 +12,27 @@ The Retryer Middleware is built-in middleware that gives you capability to retry
 As for any Middleware, you can use it by adding it to the `bus` instance.
 
 ```typescript
-const retryerMiddleware = createRetryerMiddleware({
+const commandBus = createCommandBus<CommandHandlerRegistry>();
+commandBus.useRetryerMiddleware({
     maxAttempts: 5;
     waitingAlgorithm: 'exponential',
     multiplier: 1.5;
     jitter: 0.5;
 });
-const commandBus = createCommandBus<CommandHandlerRegistry>();
-commandBus.use(retryerMiddleware);
 ```
+
+> Remember built-in middlewares are _intent_ aware, therefore you can customize the behavior per intent using the key `intents`.
 
 ### Explanation
 
-The Retryer middleware is going to catch the exection and re-run the following middleware until the `maxAttempts` is reached.
+The Retryer middleware is going to catch the execution and re-run the following middleware until the `maxAttempts` is reached.
 Between each attempt, the middleware is going to wait for a certain amount of time. 
 The `waitingAlgorithm` can be `exponential`, `fibonacci`, or `none`.
 
 - `jitter` is a value between 0 and 1 that will add some randomness to the waiting time.
 - `multiplier` is the factor to multiply the waiting time between each attempt. (only used for `exponential`)
+
+> Internally, the retryer middleware will keep a registry of _sleeper_ if you decide to have different configuration per intent.
 
 <Aside title="Error Stamps" type="caution">
 Retryer Middleware will also retry the handling of the intent if it finds more `error` stamps than before.

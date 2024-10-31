@@ -70,10 +70,18 @@ To use middleware in Missive.js, you attach it to the service bus when configuri
 Middleware functions are applied in the order they are added, forming a processing pipeline.
 
 ```typescript
-const loggerMiddleware = createLoggerMiddleware();
+const myMiddleware = createMyMiddleware<'query', QueryHandlerRegistry>();
 const queryBus = createQueryBus<QueryHandlerRegistry>();
 queryBus.use(loggerMiddleware);
-queryBus.register('getUser', getUserQuerySchema, createGetUserHandler({}));
+```
+
+You can also use the built-in middleware in a simpler way
+
+```typescript
+const queryBus: QueryBus = createQueryBus<QueryHandlerRegistry>();
+queryBus.useLoggerMiddleware();
+queryBus.useCacherMiddleware();
+queryBus.use(myMiddleware);
 ```
 
 ## Best Practices
@@ -85,9 +93,25 @@ queryBus.register('getUser', getUserQuerySchema, createGetUserHandler({}));
 
 
 ## Summary
+
 Middleware in Missive.js offers a powerful and flexible way to manage the flow of intents through your system. By inserting middleware into 
 the pipeline, you can centralize cross-cutting concerns like validation, logging, and error handling, ensuring that your codebase remains modular, 
 clean, and easy to scale.
 
 With these principles in mind, you can build a robust, maintainable architecture that allows for complex scenarios like retry policies, detailed logging,
 and consistent validation across your entire application.
+
+## Built-in Middlewares are `intent` aware
+
+Every single built-in middleware can be configured to be `intent` aware. This means that you can have a different configuration for each intent type.
+
+```typescript
+const queryBus: QueryBus = createQueryBus<QueryHandlerRegistry>();
+queryBus.useCacherMiddleware({
+    ...defaultOptions
+    intents: {
+        YouQueryCommandEventType: {
+            ...specificOptions
+        },
+    },
+})

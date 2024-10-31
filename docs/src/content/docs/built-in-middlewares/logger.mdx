@@ -16,10 +16,11 @@ The Logger Middleware is built-in middleware that gives you capability to add ob
 As for any Middleware, you can use it by adding it to the `bus` instance.
 
 ```typescript
-const loggerMiddleware = createLoggerMiddleware({logger, adapter});
 const queryBus = createQueryBus<QueryHandlerRegistry>();
-queryBus.use(loggerMiddleware);
+queryBus.useLoggerMiddleware({logger, adapter});
 ```
+
+> Remember built-in middlewares are _intent_ aware, therefore you can customize the behavior per intent using the key `intents`.
 
 Of course, the key is in the `adapter` that you can provide to the `createLoggerMiddleware` function. 
 This adapter must respect the `LoggerAdapter` interface.
@@ -83,9 +84,9 @@ The parameters for each of those functions are:
 - `stamps`: The rest of the Stamps. (yes Identify and Results are extracted stamps from the Envelope)
 
 <Aside title="Gotcha!" type="caution">
-Those function can be `async`, the middleware will `await` for the promise to be resolved before continuing.
+Those functions can be `async`, the middleware will `await` for the promise to be resolved before continuing.
 Which means that you can log to a database or any other async operation BUT be careful with the performance.
-There are 2 other parameters you can pass to the `createLoggerMiddleware` function:
+There are 2 other parameters you can pass to the `createLoggerMiddleware` function (and per `intents`):
 - `async`: the logger will not `await` for the promises to be resolved
 - `collect`: the logger will collect the logs without awaiting during collection, and then `await` or not based on the `async` option.
 </Aside>

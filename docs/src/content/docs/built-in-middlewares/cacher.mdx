@@ -13,14 +13,15 @@ It's only available for _QueryBus_
 As for any Middleware, you can use it by adding it to the `bus` instance.
 
 ```typescript
-const cacherMiddleware = createCacherMiddleware<QueryHandlerRegistry>({ 
-    adapter, 
-    cache: 'all', 
-    defaultTtl: 3600 
-});
 const queryBus = createQueryBus<QueryHandlerRegistry>();
-queryBus.use(cacherMiddleware);
+queryBus.useCacherMiddleware({
+    adapter,
+    cache: 'all',
+    defaultTtl: 300
+})
 ```
+
+> Remember built-in middlewares are _intent_ aware, therefore you can customize the behavior per intent using the key `intents`.
 
 Of course, the key is in the `adapter` that you will provide to the `createCacherMiddleware` function. 
 This adapter must respect the `CacherAdapter` interface.
@@ -57,14 +58,14 @@ it will default to `memoryCache` and provide you with the basic cacher above.
 With the Cacher Middleware, if the intent result is already in the cache, it will be returned directly without
 calling the handler.
 
-Aside of the `adapter`, you can provide the following parameters to the `createCacherMiddleware` function:
+Aside of the `adapter`, you can provide the following parameters to the `createCacherMiddleware` function (and per `intents`):
 - **cache**: `all` or `only-cacheable` (default: `all`) - `all` will cache all results
 - **defaultTtl**: number (default: `3600`) - the default time to live in seconds
 
 ### Cache on demand
 
-If you don't want to cache all the queries for that a QueryBus, you can `createCacherMiddleware` with `cache` equals to `only-cacheable`.
-THen you need to tell the Middleware which queries are cacheable by adding the `cacheable` stamp to the result. 
+If you want to control the cacheable state from the handler (or another middleware), you can pass the option `cache` equals to `only-cacheable`. (globally or per intent)
+Then you need to tell the Middleware which queries are cacheable by adding the `cacheable` stamp to the result. 
 
 ```typescript
 const handler = async (envelope: Envelope<Query>, deps: Deps) => {

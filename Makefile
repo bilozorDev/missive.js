@@ -65,28 +65,32 @@ tests: codeclean ## Run Codeclean, Tests and Builds
 
 .PHONY: serve-docs
 serve-docs: ## Run the Docs
-	@$(PACKAGE_MANAGER) run dev --filter=missive.js-docs
+	@$(PACKAGE_MANAGER) run dev -F=missive.js-docs
 
 .PHONY: serve-cli-example
 serve-cli-example: ## Run the CLI Example
-	@$(PACKAGE_MANAGER) run dev --filter=missive.js-cli-example
+	@$(PACKAGE_MANAGER) run dev -F=missive.js-cli-example
 
 .PHONY: serve-remix-run-example
 serve-remix-run-example: ## Run the Remix Run Example
-	@$(PACKAGE_MANAGER) run dev --filter=missive.js-remix-run-example
+	@$(PACKAGE_MANAGER) run dev -F=missive.js-remix-run-example
 
 .PHONY: serve-astro-example
 serve-astro-example: ## Run the Astro Example
-	@$(PACKAGE_MANAGER) run dev --filter=missive.js-astro-example
+	@$(PACKAGE_MANAGER) run dev -F=missive.js-astro-example
 
 .PHONY: serve-nextjs-example
 serve-nextjs-example: ## Run the Next JS Example
-	@$(PACKAGE_MANAGER) run dev --filter=missive.js-nextjs-example
+	@$(PACKAGE_MANAGER) run dev -F=missive.js-nextjs-example
 
-.PHONY: serve-fancy-demo-on
-serve-fancy-demo-on: ## Run Fancy Demo One
-	@$(PACKAGE_MANAGER) run dev --filter=missive.js-fancy-demo-one
+.PHONY: serve-fancy-demo-one
+serve-fancy-demo-one: ## Run Fancy Demo One
+	@cd demo/fancy-demo-one && $(PACKAGE_MANAGER) exec drizzle-kit migrate 
+	@$(PACKAGE_MANAGER) run dev -F=missive.js-fancy-demo-one
 
+.PHONY: fancy-demo-one-generate-migrations
+fancy-demo-one-generate-migrations:
+	@@cd demo/fancy-demo-one &&  $(PACKAGE_MANAGER) exec drizzle-kit generate
 
 .PHONY: release
 release: ## Create a Realease (tag and push)
