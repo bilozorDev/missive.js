@@ -81,6 +81,7 @@ You can also use the built-in middleware in a simpler way
 const queryBus: QueryBus = createQueryBus<QueryHandlerRegistry>();
 queryBus.useLoggerMiddleware();
 queryBus.useCacherMiddleware();
+queryBus.useLockMiddleware({ getLockKey: (envelope) => envelope.message.id });
 queryBus.use(myMiddleware);
 ```
 
