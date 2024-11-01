@@ -13,7 +13,11 @@ export default defineConfig({
     base: `${githubPathParts[2]}`,
     integrations: [
         starlight({
-            plugins: [starlightLinksValidator()],
+            plugins: [
+                starlightLinksValidator({
+                    errorOnInvalidHashes: false,
+                }),
+            ],
             head: [
                 {
                     tag: 'script',

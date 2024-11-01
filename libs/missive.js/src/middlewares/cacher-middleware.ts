@@ -23,6 +23,7 @@ const hashKey = async (data: string): Promise<string> => {
 type BasicOptions = {
     cache?: 'all' | 'only-cacheable';
     defaultTtl?: number;
+    shortCircuit?: boolean;
 };
 
 type Options<Def> = BasicOptions & {
@@ -35,6 +36,7 @@ export function createCacherMiddleware<T extends QueryMessageRegistryType>({
     intents,
     cache = 'all',
     defaultTtl = 3600,
+    shortCircuit = false,
 }: Partial<Options<T>> = {}): Middleware<'query', T> {
     if (!adapter) {
         adapter = createMemoryCacheAdapter();
@@ -46,7 +48,10 @@ export function createCacherMiddleware<T extends QueryMessageRegistryType>({
         if (cached) {
             envelope.addStamp<HandledStamp<unknown>>('missive:handled', cached);
             envelope.addStamp<FromCacheStamp>('missive:cache:hit');
-            return;
+            const breakChain = intents?.[type]?.shortCircuit ?? shortCircuit;
+            if (breakChain) {
+                return;
+            }
         }
 
         await next();

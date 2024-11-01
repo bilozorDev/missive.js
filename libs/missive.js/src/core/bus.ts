@@ -182,6 +182,14 @@ const createBus = <BusKind extends BusKinds, HandlerDefinitions extends MessageR
                         next,
                     );
                 } else {
+                    // we do not run the handlers if the message has already been handled. by a previous middleware like cache
+                    if (
+                        envelope.stampsOfType<HandledStamp<HandlerDefinitions[MessageName]['result']>>(
+                            'missive:handled',
+                        ).length > 0
+                    ) {
+                        return;
+                    }
                     const results = await Promise.all(handlers.map(async (handler) => await handler(envelope)));
                     results.forEach((result) =>
                         envelope.addStamp<HandledStamp<HandlerDefinitions[MessageName]['result']>>(

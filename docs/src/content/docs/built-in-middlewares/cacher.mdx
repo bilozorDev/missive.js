@@ -87,6 +87,40 @@ The Cacher Middleware is going to add:
         ```
         > When the result is coming from cache.
 
+    -    
+        ```typescript
+        export type HandledStamp<R> = Stamp<R, 'missive:handled'>;
+        ```
+        > With the result from the cache.  
+
+
+## Shortcircuiting the processing
+
+As explain the [Middleware guide](/missive.js/guides/middlewares#breaking-the-chain-of-middlewares), you can shortcircuit the processing by _NOT_ calling `next()` in a middleware.
+CacherMiddleware is adding the `HandledStamp` which means the bus won't call the handler when the result is coming from the cache, but all the middlewares will be called.
+
+If you want to shortcut the processing, using this built-in middleware, you can provide the `shortCircuit` flag.
+
+```typescript
+    container.cradle.queryBus.useCacherMiddleware({
+        adapter: memoryStorage,
+        shortCircuit: false, // default
+        defaultTtl: 20,
+        intents: {
+            ListAllCharacters: { shortCircuit: true },
+        },
+    });
+```
+
+<Aside title="Why is it not default?" type="tip">
+Shortcircuiting the processing is a powerful feature, but it can lead to unexpected behavior if not used correctly.
+A simple example is when you want observability, shortcircuiting the processing will prevent you from seeing the intent `processed` in the logs.
+On the other side, if you don't shortcircuit, as other middlewares will still called, they could have side effects...
+
+> **With great power comes great responsibility.**: Missive.js is not opinionated, it's up to you to decide what is best for your application.
+</Aside>
+
+
 
 ## Going further
 

@@ -3,7 +3,7 @@ title: Middlewares
 description: A guide on how to first use Middlwares with the Service Bus
 ---
 
-import { Steps } from '@astrojs/starlight/components';
+import { Steps, Aside, Badge } from '@astrojs/starlight/components';
 
 Missive.js includes a powerful middleware system in each bus to process intents (`command`, `query`, and `event`) in a flexible and extendable manner. 
 Middleware allows you to insert cross-cutting concerns such as validation, logging, authentication, error handling, and more into the 
@@ -92,7 +92,6 @@ queryBus.use(myMiddleware);
 - **Keep Middleware Focused**: Each middleware should handle one concern to keep the pipeline clean and maintainable.
 - **Mutation**: Avoid mutating the intent or its _Envelope_ in a middleware unless necessary. Instead, use _Stamps_ to pass data between middlewares and handlers.
 
-
 ## Summary
 
 Middleware in Missive.js offers a powerful and flexible way to manage the flow of intents through your system. By inserting middleware into 
@@ -116,3 +115,16 @@ queryBus.useCacherMiddleware({
         },
     },
 })
+```
+
+## Breaking the Chain (of middlewares) <Badge text='advanced' variant='danger'/>
+
+In some situations, you may want to stop the processing of an intent before it reaches the handler. Indeed, if a middleware function does not call the `next` function,
+the chain middleware will be broken, and the intent will not be processed further.
+
+This is really convenient for performance for instance, but it is not always what you want to do.
+For this reason the bus will never handle an intent that has been handled already. It does that information thanks to the `missive:handled` stamp.
+
+Within the built-in middlewares, here is the list of the ones that can break the chain:
+- [**CacherMiddleware**](/missive.js/built-in-middlewares/cacher): if the intent has been cached you have the option to break the chain.
+

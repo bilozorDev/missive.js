@@ -25,7 +25,20 @@ describe('createCacherMiddleware', () => {
         next = vi.fn();
     });
 
-    it('should use cache when cache is hit', async () => {
+    it('should use cache when cache is hit - shortcituit', async () => {
+        (adapter.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: 'cached' });
+
+        middleware = createCacherMiddleware({ adapter, shortCircuit: true });
+
+        await middleware(envelope, next);
+
+        expect(adapter.get).toHaveBeenCalled();
+        expect(envelope.addStamp).toHaveBeenCalledWith('missive:handled', { data: 'cached' });
+        expect(envelope.addStamp).toHaveBeenCalledWith('missive:cache:hit');
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should use cache when cache is hit - NO shortcituit', async () => {
         (adapter.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: 'cached' });
 
         middleware = createCacherMiddleware({ adapter });
@@ -35,7 +48,7 @@ describe('createCacherMiddleware', () => {
         expect(adapter.get).toHaveBeenCalled();
         expect(envelope.addStamp).toHaveBeenCalledWith('missive:handled', { data: 'cached' });
         expect(envelope.addStamp).toHaveBeenCalledWith('missive:cache:hit');
-        expect(next).not.toHaveBeenCalled();
+        expect(next).toHaveBeenCalled();
     });
 
     it('should call next and cache result when cache is missed', async () => {

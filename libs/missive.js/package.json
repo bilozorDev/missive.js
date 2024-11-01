@@ -18,7 +18,7 @@
         "Sébastien Morel <plopix@gmail.com>",
         "Anaël Chardan"
     ],
-    "version": "0.0.7",
+    "version": "0.0.8",
     "type": "module",
     "main": "./build/index.cjs",
     "module": "./build/index.js",

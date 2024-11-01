@@ -74,13 +74,16 @@ export const buildContainer = () => {
         error: (...args: unknown[]) => {},
     };
 
-    container.cradle.queryBus.useCacherMiddleware({
-        adapter: memoryStorage,
-        defaultTtl: 20,
-    });
     container.cradle.queryBus.useLoggerMiddleware({ logger: observabilityLogger });
     container.cradle.queryBus.useLoggerMiddleware({ logger: simpleLogger });
-
+    container.cradle.queryBus.useCacherMiddleware({
+        adapter: memoryStorage,
+        shortCircuit: false,
+        defaultTtl: 20,
+        intents: {
+            ListAllCharacters: { shortCircuit: true },
+        },
+    });
     container.cradle.queryBus.register(
         'ListAllCharacters',
         ListAllCharactersQuerySchema,
