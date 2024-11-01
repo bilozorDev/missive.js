@@ -25,10 +25,10 @@ describe('createCacherMiddleware', () => {
         next = vi.fn();
     });
 
-    it('should use cache when cache is hit - shortcituit', async () => {
+    it('should use cache when cache is hit - shortcircuit (default)', async () => {
         (adapter.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: 'cached' });
 
-        middleware = createCacherMiddleware({ adapter, shortCircuit: true });
+        middleware = createCacherMiddleware({ adapter });
 
         await middleware(envelope, next);
 
@@ -38,10 +38,10 @@ describe('createCacherMiddleware', () => {
         expect(next).not.toHaveBeenCalled();
     });
 
-    it('should use cache when cache is hit - NO shortcituit', async () => {
+    it('should use cache when cache is hit - NO shortcircuit', async () => {
         (adapter.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: 'cached' });
 
-        middleware = createCacherMiddleware({ adapter });
+        middleware = createCacherMiddleware({ adapter, shortCircuit: false });
 
         await middleware(envelope, next);
 

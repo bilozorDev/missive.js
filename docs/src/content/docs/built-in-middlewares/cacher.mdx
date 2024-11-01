@@ -97,30 +97,32 @@ The Cacher Middleware is going to add:
 ## Shortcircuiting the processing
 
 As explain the [Middleware guide](/missive.js/guides/middlewares#breaking-the-chain-of-middlewares), you can shortcircuit the processing by _NOT_ calling `next()` in a middleware.
-CacherMiddleware is adding the `HandledStamp` which means the bus won't call the handler when the result is coming from the cache, but all the middlewares will be called.
 
-If you want to shortcut the processing, using this built-in middleware, you can provide the `shortCircuit` flag.
+This is exactly what the CacherMiddleware does. It does not call `next()` which means that all the middlewares after it will be skipped. 
+
+You can change this behavior by providing the `shortCircuit` flag to `false`.
 
 ```typescript
-    container.cradle.queryBus.useCacherMiddleware({
+    queryBus.useCacherMiddleware({
         adapter: memoryStorage,
-        shortCircuit: false, // default
+        shortCircuit: false, // default is true
         defaultTtl: 20,
         intents: {
-            ListAllCharacters: { shortCircuit: true },
+            ListAllCharacters: { shortCircuit: true }, // this intent will skip all the middlewares after Cacher
         },
     });
 ```
 
-<Aside title="Why is it not default?" type="tip">
-Shortcircuiting the processing is a powerful feature, but it can lead to unexpected behavior if not used correctly.
-A simple example is when you want observability, shortcircuiting the processing will prevent you from seeing the intent `processed` in the logs.
-On the other side, if you don't shortcircuit, as other middlewares will still called, they could have side effects...
-
-> **With great power comes great responsibility.**: Missive.js is not opinionated, it's up to you to decide what is best for your application.
+<Aside title="Handling won't happen twice!" type="note">
+Shortcircuiting has no impact on the "handling". As CacherMiddleware is adding the `HandledStamp` the bus won't call the handler anyway when the result is coming from the cache.
+The only impact of this flag is wether or not the next middlewares are called or not.
 </Aside>
 
+> **With great power comes great responsibility.** - Missive.js is not opinionated, it's up to you to decide what is best for your application.
 
+<Aside title="Why do we default to `shortCircuit: true`" type="tip">
+We believe this is the expected behavior, and as subsequent middlewares might have side-effects, we prefer to skip them in those scenarios. (but you do you!)
+</Aside>
 
 ## Going further
 

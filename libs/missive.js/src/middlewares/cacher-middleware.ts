@@ -36,7 +36,7 @@ export function createCacherMiddleware<T extends QueryMessageRegistryType>({
     intents,
     cache = 'all',
     defaultTtl = 3600,
-    shortCircuit = false,
+    shortCircuit = true,
 }: Partial<Options<T>> = {}): Middleware<'query', T> {
     if (!adapter) {
         adapter = createMemoryCacheAdapter();
