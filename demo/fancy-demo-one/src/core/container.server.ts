@@ -12,10 +12,15 @@ import {
 } from '~/domain/contracts/bus';
 import { drizzle } from 'drizzle-orm/libsql';
 import {
-    createListAllCharacterHandler,
+    createListAllCharactersHandler,
     ListAllCharactersQuerySchema,
 } from '~/domain/use-cases/read/list-all-characters.server';
 import { DefaultLogger } from 'drizzle-orm/logger';
+import { AddCharacterCommandSchema, createAddCharacterHandler } from '~/domain/use-cases/write/add-character.server';
+import { AddQuestCommandSchema, createAddQuestHandler } from '~/domain/use-cases/write/add-quest.server';
+import { createListAllQuestsHandler, ListAllQuestsQuerySchema } from '~/domain/use-cases/read/list-all-quests.server';
+import { EventEmitter } from 'events';
+import { createMemoryStorage } from '~/infrastructure/create-memory-storage.server';
 
 export const buildContainer = () => {
     const logger = createLogger(['info', 'debug']);
@@ -24,13 +29,19 @@ export const buildContainer = () => {
         connection: { url: process.env.DB_FILE_NAME! },
         logger: dLogger,
     });
+    const emitter = new EventEmitter();
     const container = createContainer<{
         logger: Logger;
         queryBus: QueryBus;
         commandBus: CommandBus;
         eventBus: EventBus;
         db: typeof db;
-        listAllCharactersQueryHandler: ReturnType<typeof createListAllCharacterHandler>;
+        emitter: typeof emitter;
+        listAllCharactersQueryHandler: ReturnType<typeof createListAllCharactersHandler>;
+        listAllQuestsQueryHandler: ReturnType<typeof createListAllQuestsHandler>;
+        addCharacterCommandHandler: ReturnType<typeof createAddCharacterHandler>;
+        addQuestCommandHandler: ReturnType<typeof createAddQuestHandler>;
+        busObsName: string;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -38,29 +49,60 @@ export const buildContainer = () => {
 
     container.register({
         logger: asValue(logger),
+        emitter: asValue(emitter),
         queryBus: asFunction(() => createQueryBus<QueryDefitions>()).singleton(),
         commandBus: asFunction(() => createCommandBus<CommandDefitions>()).singleton(),
         eventBus: asFunction(() => createEventBus<EventDefitions>()).singleton(),
-        listAllCharactersQueryHandler: asFunction(createListAllCharacterHandler).singleton(),
+        listAllCharactersQueryHandler: asFunction(createListAllCharactersHandler).singleton(),
+        addCharacterCommandHandler: asFunction(createAddCharacterHandler).singleton(),
+        listAllQuestsQueryHandler: asFunction(createListAllQuestsHandler).singleton(),
+        addQuestCommandHandler: asFunction(createAddQuestHandler).singleton(),
         db: asValue(db),
+        busObsName: asValue('bus-obs'),
+    });
+
+    const memoryStorage = createMemoryStorage({
+        prefix: 'missive-demo-query-bus',
     });
 
     // Query Bus
-    const loggerAdapter = { log: container.cradle.logger.info, error: container.cradle.logger.error };
-    container.cradle.queryBus.useLoggerMiddleware({ logger: loggerAdapter });
+    const simpleLogger = { log: container.cradle.logger.info, error: container.cradle.logger.error };
+    const observabilityLogger = {
+        log: (...args: unknown[]) => {
+            emitter.emit(container.cradle.busObsName, ['query', ...args]);
+        },
+        error: (...args: unknown[]) => {},
+    };
+
     container.cradle.queryBus.useCacherMiddleware({
-        defaultTtl: 10,
+        adapter: memoryStorage,
+        defaultTtl: 20,
     });
+    container.cradle.queryBus.useLoggerMiddleware({ logger: observabilityLogger });
+    container.cradle.queryBus.useLoggerMiddleware({ logger: simpleLogger });
+
     container.cradle.queryBus.register(
         'ListAllCharacters',
         ListAllCharactersQuerySchema,
         container.cradle.listAllCharactersQueryHandler,
     );
+    container.cradle.queryBus.register(
+        'ListAllQuests',
+        ListAllQuestsQuerySchema,
+        container.cradle.listAllQuestsQueryHandler,
+    );
 
     // Command Bus
-    container.cradle.commandBus.useLoggerMiddleware({ logger: loggerAdapter });
+    container.cradle.commandBus.useLoggerMiddleware({ logger: observabilityLogger });
+    container.cradle.commandBus.useLoggerMiddleware({ logger: simpleLogger });
+    container.cradle.commandBus.register(
+        'AddCharacter',
+        AddCharacterCommandSchema,
+        container.cradle.addCharacterCommandHandler,
+    );
+    container.cradle.commandBus.register('AddQuest', AddQuestCommandSchema, container.cradle.addQuestCommandHandler);
 
     // Event Bus
-    container.cradle.eventBus.useLoggerMiddleware({ logger: loggerAdapter });
+    container.cradle.eventBus.useLoggerMiddleware({ logger: simpleLogger });
     return container;
 };

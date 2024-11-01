@@ -17,6 +17,7 @@ const viteDevServer = isProduction
 
 declare module '@remix-run/node' {
     interface AppLoadContext {
+        services: ReturnType<typeof buildContainer>['cradle'];
         logger: ReturnType<typeof buildContainer>['cradle']['logger'];
         createQuery: ReturnType<typeof buildContainer>['cradle']['queryBus']['createQuery'];
         dispatchQuery: ReturnType<typeof buildContainer>['cradle']['queryBus']['dispatch'];

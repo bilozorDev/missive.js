@@ -46,7 +46,7 @@ export function createLoggerMiddleware<BusKind extends BusKinds, T extends Messa
         logger = console;
     }
     if (!adapter) {
-        adapter = createLoggerAdapter(logger);
+        adapter = createLoggerAdapter({ logger });
     }
 
     const log = async (step: Step, envelope: Envelope<unknown>, doAsync: boolean) => {

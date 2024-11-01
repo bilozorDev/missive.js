@@ -5,6 +5,7 @@ export type {
     QueryHandlerDefinition,
     CommandHandlerDefinition,
     EventHandlerDefinition,
+    TypedMessage,
 } from './core/bus.js';
 export { createCommandBus, createEventBus, createQueryBus } from './core/bus.js';
 
@@ -25,3 +26,7 @@ export { createWebhookMiddleware } from './middlewares/webhook-middleware.js';
 
 export { createLockMiddleware } from './middlewares/lock-middleware.js';
 export type { LockAdapter } from './middlewares/lock-middleware.js';
+
+export { createMemoryCacheAdapter } from './adapters/in-memory-cache-adapter.js';
+export { createInMemoryLockAdapter } from './adapters/in-memory-lock-adapter.js';
+export { createLoggerAdapter } from './adapters/console-logger-adapter.js';

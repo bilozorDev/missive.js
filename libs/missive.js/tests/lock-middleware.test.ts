@@ -36,7 +36,6 @@ describe('createLockMiddleware', () => {
         const middleware = createLockMiddleware<'command', MessageRegistry>(
             {
                 getLockKey: (e) => {
-                    console.log(e.message.id);
                     return e.message.id.toString();
                 },
             },
@@ -58,7 +57,6 @@ describe('createLockMiddleware', () => {
         const middleware = createLockMiddleware<'command', MessageRegistry>(
             {
                 getLockKey: (e) => {
-                    console.log(e.message.id);
                     return e.message.id.toString();
                 },
             },
@@ -80,7 +78,6 @@ describe('createLockMiddleware', () => {
         const middleware = createLockMiddleware<'command', MessageRegistry>(
             {
                 getLockKey: (e) => {
-                    console.log(e.message.id);
                     return e.message.id.toString();
                 },
             },
@@ -98,7 +95,6 @@ describe('createLockMiddleware', () => {
         const middleware = createLockMiddleware<'command', MessageRegistry>(
             {
                 getLockKey: (e) => {
-                    console.log(e.message.id);
                     return e.message.id.toString();
                 },
             },
