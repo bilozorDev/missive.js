@@ -43,7 +43,13 @@ We love clean architecture and CQRS, we didn't find any simple Service Bus that 
     <Card title="Middlewares" icon="open-book">
         Can we call it a Service Bus without Middlewares? _(we don't)_. Register middlewares to leverage the full power
         of the service bus.
-        We got you covered with built-in middlewares like [Logger](/missive.js/built-in-middlewares/logger), [Caching](/missive.js/built-in-middlewares/cacher), [Retry](/missive.js/built-in-middlewares/retryer), [Lock](/missive.js/built-in-middlewares/lock) or [Webhook](/missive.js/built-in-middlewares/webhook).
+        We got you covered with built-in middlewares like 
+        [Logger](/missive.js/built-in-middlewares/logger), 
+        [Caching](/missive.js/built-in-middlewares/cacher), 
+        [Retry](/missive.js/built-in-middlewares/retryer), 
+        [Lock](/missive.js/built-in-middlewares/lock), 
+        [FeatureFlag](/missive.js/built-in-middlewares/feature-flag), 
+        or [Webhook](/missive.js/built-in-middlewares/webhook).
     </Card>
     <Card title="Envelopes and Stamps" icon="email">
         Handle cross-cutting concerns with Envelopes and Stamps.
@@ -124,17 +130,22 @@ That's the power of Missive.js! Here are the built-in middlewares:
         <LinkButton href={'/missive.js/built-in-middlewares/webhook'} variant="secondary" class="float-right" title={"Read the doc about the Webhook Middleware"}>Read the doc</LinkButton>
     </Card>
 
-    <Card title="Async Middleware" icon="seti:nunjucks">
-        <p>You can already do async if you don't _await_ in your handler, but this is next level. Push the intent to a queue and handle it asynchronously.</p>
-        <p>Missive.js will provide the consumer which is going to be smart enough to handle the async processing.</p>
-        <LinkButton href={'/missive.js/contributing'} variant="secondary" class="float-right" ><Badge text='coming soon' variant='caution'/></LinkButton>
-    </Card>
-
     <Card title="Lock Middleware" icon="seti:lock">
         <p>It provide a way to lock the processing of a message based on something in the intent itself. For instance your could lock the `command` that touches a Cart.</p>
         <LinkButton href={'/missive.js/built-in-middlewares/lock'} variant="secondary" class="float-right" title={"Read the doc about the Lock Middleware"}>Read the doc</LinkButton>
     </Card>
 
+     <Card title="Feature Flag Middleware" icon="seti:yml">
+        <p>This middleware ensures that requests are conditionally processed based on the state of feature flags, enabling dynamic feature management, safer rollouts, and efficient A/B testing.</p>
+        <LinkButton href={'/missive.js/built-in-middlewares/feature-flag'} variant="secondary" class="float-right" title={"Read the doc about the Feature Flag Middleware"}>Read the doc</LinkButton>
+    </Card>
+
+    <Card title="Async Middleware" icon="seti:nunjucks">
+        <p>You can already do async if you don't _await_ in your handler, but this is next level. Push the intent to a queue and handle it asynchronously.</p>
+        <p>Missive.js will provide the consumer which is going to be smart enough to handle the async processing.</p>
+        <LinkButton href={'/missive.js/contributing'} variant="secondary" class="float-right" ><Badge text='coming soon' variant='caution'/></LinkButton>
+    </Card>
+    
 </CardGrid>
 
 ## Framework Agnostic, see the examples

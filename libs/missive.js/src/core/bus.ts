@@ -8,6 +8,7 @@ import { createCacherMiddleware } from '../middlewares/cacher-middleware.js';
 import { createRetryerMiddleware } from '../middlewares/retryer-middleware.js';
 import { createWebhookMiddleware } from '../middlewares/webhook-middleware.js';
 import { createLockMiddleware } from '../middlewares/lock-middleware.js';
+import { createFeatureFlagMiddleware } from '../middlewares/feature-flag-middleware.js';
 
 export type BusKinds = 'query' | 'command' | 'event';
 export type MessageRegistryType<BusKind extends BusKinds> = Record<string, HandlerDefinition<BusKind>>;
@@ -81,6 +82,9 @@ type MissiveCommandBus<HandlerDefinitions extends CommandMessageRegistryType> = 
     useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'command', HandlerDefinitions>>) => void;
     useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'command', HandlerDefinitions>>) => void;
     useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'command', HandlerDefinitions>>) => void;
+    useFeatureFlagMiddleware: (
+        ...props: Parameters<typeof createFeatureFlagMiddleware<'command', HandlerDefinitions>>
+    ) => void;
 };
 
 export type CommandBus<HandlerDefinitions extends CommandMessageRegistryType> = Prettify<
@@ -96,6 +100,9 @@ type MissiveQueryBus<HandlerDefinitions extends QueryMessageRegistryType> = Repl
     useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'query', HandlerDefinitions>>) => void;
     useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'query', HandlerDefinitions>>) => void;
     useCacherMiddleware: (...props: Parameters<typeof createCacherMiddleware<HandlerDefinitions>>) => void;
+    useFeatureFlagMiddleware: (
+        ...props: Parameters<typeof createFeatureFlagMiddleware<'query', HandlerDefinitions>>
+    ) => void;
 };
 export type QueryBus<HandlerDefinitions extends QueryMessageRegistryType> = Prettify<
     MissiveQueryBus<HandlerDefinitions>
@@ -109,6 +116,9 @@ type MissiveEventBus<HandlerDefinitions extends EventMessageRegistryType> = Repl
     useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'event', HandlerDefinitions>>) => void;
     useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'event', HandlerDefinitions>>) => void;
     useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'event', HandlerDefinitions>>) => void;
+    useFeatureFlagMiddleware: (
+        ...props: Parameters<typeof createFeatureFlagMiddleware<'event', HandlerDefinitions>>
+    ) => void;
 };
 export type EventBus<HandlerDefinitions extends EventMessageRegistryType> = Prettify<
     MissiveEventBus<HandlerDefinitions>
@@ -273,6 +283,11 @@ export const createCommandBus = <HandlerDefinitions extends CommandMessageRegist
         useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'command', HandlerDefinitions>>) => {
             commandBus.use(createWebhookMiddleware(...props));
         },
+        useFeatureFlagMiddleware: (
+            ...props: Parameters<typeof createFeatureFlagMiddleware<'command', HandlerDefinitions>>
+        ) => {
+            commandBus.use(createFeatureFlagMiddleware(...props));
+        },
         register: commandBus.register,
         dispatch: commandBus.dispatch,
         createCommand: commandBus.createIntent,
@@ -302,6 +317,11 @@ export const createQueryBus = <HandlerDefinitions extends QueryMessageRegistryTy
         useCacherMiddleware: (...props: Parameters<typeof createCacherMiddleware<HandlerDefinitions>>) => {
             queryBus.use(createCacherMiddleware(...props));
         },
+        useFeatureFlagMiddleware: (
+            ...props: Parameters<typeof createFeatureFlagMiddleware<'query', HandlerDefinitions>>
+        ) => {
+            queryBus.use(createFeatureFlagMiddleware(...props));
+        },
         register: queryBus.register,
         dispatch: queryBus.dispatch,
         createQuery: queryBus.createIntent,
@@ -326,6 +346,11 @@ export const createEventBus = <HandlerDefinitions extends EventMessageRegistryTy
         },
         useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'event', HandlerDefinitions>>) => {
             eventBus.use(createWebhookMiddleware(...props));
+        },
+        useFeatureFlagMiddleware: (
+            ...props: Parameters<typeof createFeatureFlagMiddleware<'event', HandlerDefinitions>>
+        ) => {
+            eventBus.use(createFeatureFlagMiddleware(...props));
         },
         register: eventBus.register,
         dispatch: eventBus.dispatch,

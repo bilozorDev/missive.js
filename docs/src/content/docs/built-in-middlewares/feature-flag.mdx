@@ -1,0 +1,114 @@
+---
+title: Feature Flag Middleware
+description: Built-in middleware to control the activation of specific features.
+---
+
+import { Icon, Aside } from '@astrojs/starlight/components';
+
+The FeatureFlag Middleware in Missive.js provides developers with the ability to control the activation of specific features when handling commands 
+or queries in their applications. This middleware ensures that requests are conditionally processed based on the state of feature flags, 
+enabling dynamic feature management, safer rollouts, and efficient A/B testing.
+
+## How to use it
+
+As for any Middleware, you can use it by adding it to the `bus` instance.
+
+```typescript
+const queryBus = createQueryBus<QueryHandlerRegistry>();
+queryBus.useFeatureFlagMiddleware({
+    // this is most likely be a service that you inject here
+    // for the sake of a clear documentation we are using a simple function to randomly return true or false
+    featureFlagChecker: async (intent) => {
+        if (intent === 'getUser') {
+            return Math.random() > 0.5;
+        }
+        return true;
+    },
+    intents: {
+        getUser: {
+            // same here, your handler exist already and can be injected here
+            // for the sake of a clear documentation we are returning a simple object
+            fallbackHandler: async (envelope) => {
+                return {
+                    success: false,
+                    nickname: '1234',
+                    user: {
+                        id: '1234',
+                        email: 'asd',
+                    }
+                }
+            },
+            shortCircuit: false, // default is true
+        }
+    }
+})
+```
+
+### Explanation
+
+With the Feature Flag Middleware you can control the activation of specific features based on the result of the `featureFlagChecker` function.
+But what if the feature is not activated? You can provide a `fallbackHandler` that will be called instead of the handler.
+From there, you can decide to return a default value, throw an error, or do whatever you want.
+
+The `shortCircuit` flag is also available to control the behavior of the middleware. By default, it is set to `true`, which means that the middleware 
+will shortcircuit the processing if the feature is not activated (fallback used). If you set it to `false`, the middleware will continue the processing 
+and call the next middlewares but the final handler will not be called.
+
+<Aside title="Result consistency" type="tip">
+For consistency, you will notice that the _fallbackHandler_ must return the same type as the handler .
+</Aside>
+
+## Added Stamps 
+
+The Feature Flag Middleware is going to add:
+
+    -     
+        ```typescript
+        type FeatureFlagFallbackStamp = Stamp<undefined, 'missive:feature-flag-fallback'>;
+
+        ```
+        > When a fallbackHandler is used.
+
+    -    
+        ```typescript
+        type HandledStamp<R> = Stamp<R, 'missive:handled'>;
+        ```
+        > When a fallbackHandler is used. (this stamp will always be there, added by this middleware or the handler)
+
+
+## Shortcircuiting the processing
+
+As explain the [Middleware guide](/missive.js/guides/middlewares#breaking-the-chain-of-middlewares), you can shortcircuit the processing by _NOT_ calling `next()` in a middleware.
+
+This is exactly what the CacherMiddleware does. It does not call `next()` which means that all the middlewares after it will be skipped. 
+
+You can change this behavior by providing the `shortCircuit` flag to `false`.
+
+```typescript
+    queryBus.useCacherMiddleware({
+        adapter: memoryStorage,
+        shortCircuit: false, // default is true
+        defaultTtl: 20,
+        intents: {
+            ListAllCharacters: { shortCircuit: true }, // this intent will skip all the middlewares after Cacher
+        },
+    });
+```
+
+<Aside title="Handling won't happen twice!" type="note">
+Shortcircuiting has no impact on the "handling". As CacherMiddleware is adding the `HandledStamp` the bus won't call the handler anyway when the result is coming from the cache.
+The only impact of this flag is wether or not the next middlewares are called or not.
+</Aside>
+
+> **With great power comes great responsibility.** - Missive.js is not opinionated, it's up to you to decide what is best for your application.
+
+<Aside title="Why do we default to `shortCircuit: true`" type="tip">
+We believe this is the expected behavior, and as subsequent middlewares might have side-effects, we prefer to skip them in those scenarios. (but you do you!)
+</Aside>
+
+## Going further
+
+<div class='flex flex-row'>
+    <span className='pr-2'>Look at the code of the </span>
+    <a href="https://github.com/Missive-js/missive.js/tree/main/libs/missive.js/src/middlewares/cacher-middleware.ts" class="contents" target="_blank"><Icon name="github" class="mr-2"/>Cacher Middleware</a>
+</div>

@@ -23,6 +23,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
     envelope.addStamp<CacheableStamp>('missive:cacheable', { ttl: 1800 });
     return {
         success: true,
+        nickname: 'plopix',
         user: {
             id: '1234',
             email: 'plopix@example.com',

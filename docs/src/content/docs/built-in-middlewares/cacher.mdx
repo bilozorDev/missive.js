@@ -89,9 +89,9 @@ The Cacher Middleware is going to add:
 
     -    
         ```typescript
-        export type HandledStamp<R> = Stamp<R, 'missive:handled'>;
+        type HandledStamp<R> = Stamp<R, 'missive:handled'>;
         ```
-        > With the result from the cache.  
+        > With the result from the cache. (this stamp will always be there, added by this middleware or the handler)
 
 
 ## Shortcircuiting the processing

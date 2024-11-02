@@ -21,23 +21,26 @@ commandBus.useWebhookMiddleware({
     multiplier: 1.5,
     waitingAlgorithm: 'exponential',
     fetcher: fetch,
-    mapping: {
-        createUser: [
-            {
-                url: 'https://webhook.site/c351ab7a-c4cc-4270-9872-48a2d4f67ea4',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+    intents: {
+        createUser: {
+            async: false,
+            parallel: false,
+            jitter: 0.25,
+            endpoints: [
+                {
+                    url: 'https://webhook.site/c351ab7a-c4cc-4270-9872-48a2d4f67ea4',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    signatureHeader: 'X-Plop-Signature',
+                    signature: (payload) => 'signature',
                 },
-                signatureHeader: 'X-Plop-Signature',
-                signature: (payload) => 'signature',
-            }
-        ],
+            ],
+        },
     },
 });
 ```
-
-> Remember built-in middlewares are _intent_ aware, therefore you can customize the behavior per intent using the key `intents`.
 
 ### Explanation
 

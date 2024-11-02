@@ -24,6 +24,42 @@ const queryBus: QueryBus = createQueryBus<QueryHandlerRegistry>();
 queryBus.useLoggerMiddleware();
 queryBus.useCacherMiddleware();
 queryBus.use(loggerMiddleware);
+
+queryBus.useFeatureFlagMiddleware({
+    featureFlagChecker: async (intent) => {
+        if (intent === 'getUser') {
+            return Math.random() > 0.5;
+        }
+        return true;
+    },
+    intents: {
+        getUser: {
+            fallbackHandler: async (envelope) => {
+                return {
+                    success: false,
+                    nickname: '1234',
+                    user: {
+                        id: '1234',
+                        email: 'asd',
+                    },
+                };
+            },
+            shortCircuit: false,
+        },
+        getOrders: {
+            fallbackHandler: async (envelope) => {
+                return {
+                    success: false,
+                    orders: [],
+                    user: {
+                        id: '1234',
+                        email: 'asd',
+                    },
+                };
+            },
+        },
+    },
+});
 queryBus.register('getUser', getUserQuerySchema, createGetUserHandler({}));
 queryBus.register('getOrders', getOrdersQuerySchema, createGetOrdersHandler({}));
 

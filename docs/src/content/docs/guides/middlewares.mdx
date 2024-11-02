@@ -125,6 +125,6 @@ the chain middleware will be broken, and the intent will not be processed furthe
 This is really convenient for performance for instance, but it is not always what you want to do.
 For this reason the bus will never handle an intent that has been handled already. It does that information thanks to the `missive:handled` stamp.
 
-Within the built-in middlewares, here is the list of the ones that can break the chain:
-- [**CacherMiddleware**](/missive.js/built-in-middlewares/cacher): if the intent has been cached you have the option to break the chain.
-
+Within the built-in middlewares, here is the list of the ones where you have the option to break the chain. _(default: yes)_:
+- [**CacherMiddleware**](/missive.js/built-in-middlewares/cacher): if the intent has been cached.
+- [**FeatureFlagiddleware**](/missive.js/built-in-middlewares/feature-flag): if the intent has been handled by a _fallbackHandler_.
