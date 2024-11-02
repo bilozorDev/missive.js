@@ -11,13 +11,10 @@ type REvent = {
 };
 export default function Observability() {
     const data = useEventSource(`/api/bus/stream`);
-
     const [events, setEvents] = useState<REvent[]>([]);
-
     useEffect(() => {
         if (data) {
             const decoded = JSON.parse(data);
-            console.log({ decoded });
             const [type, id, encoded] = decoded;
             const { message, results, stamps } = JSON.parse(encoded);
             const { __type, ...rest } = message;
@@ -35,7 +32,6 @@ export default function Observability() {
         }
     }, [data]);
 
-    console.log(events);
     return (
         <main className="p-10">
             <h1 className="text-4xl">Hero Quest Manager</h1>

@@ -52,7 +52,7 @@
     },
     "scripts": {
         "types:check": "tsc --noEmit",
-        "build": "cp ../../README.md . && tsup",
+        "build": "cp ../../README.md ../../LICENSE . && tsup",
         "watch": "tsc -W --preserveWatchOutput",
         "lint:check": "eslint .",
         "lint:fix": "eslint . --fix",
@@ -64,7 +64,8 @@
     "files": [
         "package.json",
         "build",
-        "LICENSE.md"
+        "README.md",
+        "LICENSE"
     ],
     "dependencies": {
         "nanoid": "^5.0.8"
