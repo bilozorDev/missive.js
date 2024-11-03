@@ -15,14 +15,20 @@ As for any Middleware, you can use it by adding it to the `bus` instance.
 ```typescript
 const commandBus = createCommandBus<CommandHandlerRegistry>();
 commandBus.useLockMiddleware({
-        getLockKey: (envelope) => envelope.message.id,
-    }, {
-        adapter,
-        ttl: 500, // the default ttl for all messages
-        tick: 100, // the delay between each try to get the lock
-        timeout: 1000 // the maximum time to wait for the lock
-    }
-)
+    adapter,
+    ttl: 500, // the default ttl for all messages
+    tick: 100, // the delay between each try to get the lock
+    timeout: 1000 // the maximum time to wait for the lock
+    getLockKey: async (envelope) => envelope.message.__type,
+    intents: {
+        createUser: {
+            getLockKey: async (envelope) => envelope.message.something,
+            timeout: 20,
+            ttl: 50,
+            tick: 10,
+        },
+    },
+});
 ```
 
 > Remember built-in middlewares are _intent_ aware, therefore you can customize the behavior per intent using the key `intents`.

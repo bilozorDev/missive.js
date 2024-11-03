@@ -1,7 +1,8 @@
-import { BusKinds, MessageRegistryType } from '../core/bus.js';
+import { BusKinds, MessageRegistry, MessageRegistryType, TypedMessage } from '../core/bus.js';
 
 import { Middleware } from '../core/middleware.js';
 import { createInMemoryLockAdapter } from '../adapters/in-memory-lock-adapter.js';
+import { Envelope } from '../core/envelope.js';
 
 export type LockAdapter = {
     acquire: (key: string, ttl: number) => Promise<boolean>;
@@ -14,30 +15,31 @@ type BasicOptions = {
     tick?: number;
 };
 
-type Options<Def> = BasicOptions & {
-    adapter: LockAdapter;
-    intents?: Partial<Record<keyof Def, BasicOptions>>;
+type Options<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> = BasicOptions & {
+    adapter?: LockAdapter;
+    getLockKey: (envelope: Envelope<TypedMessage<MessageRegistry<BusKind, T>>>) => Promise<string>;
+    intents?: {
+        [K in keyof T]?: BasicOptions & {
+            getLockKey?: (envelope: NarrowedEnvelope<BusKind, T, K>) => Promise<string>;
+        };
+    };
 };
 
-type Params<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> = {
-    getLockKey: (envelope: LockMiddlewareMessage<BusKind, T>) => string;
-};
-
-type LockMiddlewareMessage<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> = Parameters<
-    Middleware<BusKind, T>
->[0];
+type NarrowedEnvelope<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>, K extends keyof T> = Envelope<
+    TypedMessage<MessageRegistry<BusKind, Pick<T, K>>>
+>;
 
 export function createLockMiddleware<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>>(
-    { getLockKey }: Params<BusKind, T>,
-    options: Partial<Options<T>> = {},
+    options: Options<BusKind, T>,
 ): Middleware<BusKind, T> {
     const adapter = options.adapter ?? createInMemoryLockAdapter();
-
     return async (envelope, next) => {
-        const type = envelope.message.__type;
+        const type = envelope.message.__type as keyof T;
         const ttl = options.intents?.[type]?.ttl ?? options.ttl ?? 500;
         const tick = options.intents?.[type]?.tick ?? options.tick ?? 100;
-        const lockKey = getLockKey(envelope);
+        const getLockKey = options.intents?.[type]?.getLockKey ?? options.getLockKey;
+        const lockKey = await getLockKey(envelope);
+
         async function doUnderLock(timeout: number) {
             const isAcquired = await adapter.acquire(lockKey, ttl);
             if (isAcquired) {

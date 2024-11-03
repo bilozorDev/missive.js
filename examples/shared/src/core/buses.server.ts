@@ -97,27 +97,22 @@ commandBus.useMockerMiddleware({
         },
     },
 });
-commandBus.useLockMiddleware(
-    {
-        getLockKey: (envelope) => {
-            return '12';
+commandBus.useLockMiddleware({
+    adapter: {
+        acquire: async () => true,
+        release: async () => undefined,
+    },
+    timeout: 1000,
+    getLockKey: async (envelope) => envelope.message.__type,
+    intents: {
+        createUser: {
+            getLockKey: async (envelope) => envelope.message.email,
+            timeout: 2000,
+            ttl: 500,
+            tick: 100,
         },
     },
-    {
-        adapter: {
-            acquire: async () => true,
-            release: async () => undefined,
-        },
-        timeout: 1000,
-        intents: {
-            createUser: {
-                timeout: 2000,
-                ttl: 500,
-                tick: 100,
-            },
-        },
-    },
-);
+});
 
 commandBus.useWebhookMiddleware({
     async: true,
