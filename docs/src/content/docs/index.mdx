@@ -49,6 +49,7 @@ We love clean architecture and CQRS, we didn't find any simple Service Bus that 
         [Retry](/missive.js/built-in-middlewares/retryer), 
         [Lock](/missive.js/built-in-middlewares/lock), 
         [FeatureFlag](/missive.js/built-in-middlewares/feature-flag), 
+        [Mock](/missive.js/built-in-middlewares/mocker), 
         or [Webhook](/missive.js/built-in-middlewares/webhook).
     </Card>
     <Card title="Envelopes and Stamps" icon="email">
@@ -138,6 +139,11 @@ That's the power of Missive.js! Here are the built-in middlewares:
      <Card title="Feature Flag Middleware" icon="seti:yml">
         <p>This middleware ensures that requests are conditionally processed based on the state of feature flags, enabling dynamic feature management, safer rollouts, and efficient A/B testing.</p>
         <LinkButton href={'/missive.js/built-in-middlewares/feature-flag'} variant="secondary" class="float-right" title={"Read the doc about the Feature Flag Middleware"}>Read the doc</LinkButton>
+    </Card>
+
+     <Card title="Mock Middleware" icon="seti:purescript">
+        <p>This middleware is pretty useful in development mode, to mock the result of a specific intent to bypass the handler.</p>
+        <LinkButton href={'/missive.js/built-in-middlewares/mocker'} variant="secondary" class="float-right" title={"Read the doc about the Mocker Middleware"}>Read the doc</LinkButton>
     </Card>
 
     <Card title="Async Middleware" icon="seti:nunjucks">

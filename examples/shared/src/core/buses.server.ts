@@ -83,7 +83,42 @@ const commandBus: CommandBus = createCommandBus<CommandHandlerRegistry>({
         { messageName: 'removeUser', schema: removeUserCommandSchema, handler: createRemoveUserHandler({}) },
     ],
 });
-commandBus.useLoggerMiddleware();
+commandBus.useMockerMiddleware({
+    intents: {
+        createUser: async (envelope) => ({
+            success: true,
+            userId: '1234',
+        }),
+        removeUser: async (envelope) => {
+            return {
+                success: true,
+                removeCount: 42,
+            };
+        },
+    },
+});
+commandBus.useLockMiddleware(
+    {
+        getLockKey: (envelope) => {
+            return '12';
+        },
+    },
+    {
+        adapter: {
+            acquire: async () => true,
+            release: async () => undefined,
+        },
+        timeout: 1000,
+        intents: {
+            createUser: {
+                timeout: 2000,
+                ttl: 500,
+                tick: 100,
+            },
+        },
+    },
+);
+
 commandBus.useWebhookMiddleware({
     async: true,
     parallel: true,

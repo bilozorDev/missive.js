@@ -1,0 +1,53 @@
+---
+title: Mocker Middleware
+description: Built-in middleware to bypass the handler
+---
+
+import { Icon, Aside } from '@astrojs/starlight/components';
+
+The Mocker Middleware in Missive.js provides developers with the ability to bypass the handler and return a predefined value. 
+This is useful for testing purposes or to simulate a specific behavior.
+
+It's also very efficient to use in development when you want to test a specific behavior without having to implement the whole logic.
+
+## How to use it
+
+As for any Middleware, you can use it by adding it to the `bus` instance.
+
+```typescript
+const queryBus = createQueryBus<QueryHandlerRegistry>();
+queryBus.useMockerMiddleware({
+    intents: {
+        createUser: async (envelope) => ({
+            success: true,
+            userId: '1234',
+        }),
+    },
+});
+```
+
+### Explanation
+
+With the Mocker Middleware you can mock results for specific intents.
+There is not much to say about this middleware, it's pretty straightforward. You provide a function that will be called instead of the handler.
+
+<Aside title="Consistency" type="tip">
+Aside the fact that it is fully type-safe here, the Mocker Middleware is not going to break the chain of Middlewares. It would not make sense.
+</Aside>
+
+## Added Stamps 
+
+The Feature Flag Middleware is going to add:
+
+    -    
+        ```typescript
+        type HandledStamp<R> = Stamp<R, 'missive:handled'>;
+        ```
+        > This stamp will always be there, added by this middleware or the final handler.
+
+## Going further
+
+<div class='flex flex-row'>
+    <span className='pr-2'>Look at the code of the </span>
+    <a href="https://github.com/Missive-js/missive.js/tree/main/libs/missive.js/src/middlewares/mocker-middleware.ts" class="contents" target="_blank"><Icon name="github" class="mr-2"/>Mocker Middleware</a>
+</div>

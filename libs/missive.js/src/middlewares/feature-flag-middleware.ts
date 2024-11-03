@@ -6,7 +6,7 @@ type Options<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> =
     featureFlagChecker: (intent: keyof T) => Promise<boolean>;
     intents: {
         [K in keyof T]?: {
-            fallbackHandler: (envelope: Envelope<TypedMessage<MessageRegistry<BusKind, T>>>) => Promise<T[K]['result']>;
+            fallbackHandler: (envelope: NarrowedEnvelope<BusKind, T, K>) => Promise<T[K]['result']>;
             shortCircuit?: boolean;
         };
     };
@@ -14,13 +14,16 @@ type Options<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> =
 
 export type FeatureFlagFallbackStamp = Stamp<undefined, 'missive:feature-flag-fallback'>;
 
+type NarrowedEnvelope<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>, K extends keyof T> = Envelope<
+    TypedMessage<MessageRegistry<BusKind, Pick<T, K>>>
+>;
+
 export function createFeatureFlagMiddleware<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>>({
     featureFlagChecker,
     intents,
 }: Options<BusKind, T>): Middleware<BusKind, T> {
     return async (envelope, next) => {
         const type = envelope.message.__type as keyof T;
-
         const allowed = await featureFlagChecker(type);
         if (allowed) {
             await next();

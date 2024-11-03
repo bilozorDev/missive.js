@@ -83,7 +83,9 @@ type MissiveCommandBus<HandlerDefinitions extends CommandMessageRegistryType> = 
     useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'command', HandlerDefinitions>>) => void;
     useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'command', HandlerDefinitions>>) => void;
     useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'command', HandlerDefinitions>>) => void;
-    useFeatureFlagMiddleware: (...props: Parameters<typeof createFeatureFlagMiddleware<'command', HandlerDefinitions>>) => void;
+    useFeatureFlagMiddleware: (
+        ...props: Parameters<typeof createFeatureFlagMiddleware<'command', HandlerDefinitions>>
+    ) => void;
     useMockerMiddleware: (...props: Parameters<typeof createMockerMiddleware<'command', HandlerDefinitions>>) => void;
 };
 
@@ -100,7 +102,9 @@ type MissiveQueryBus<HandlerDefinitions extends QueryMessageRegistryType> = Repl
     useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'query', HandlerDefinitions>>) => void;
     useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'query', HandlerDefinitions>>) => void;
     useCacherMiddleware: (...props: Parameters<typeof createCacherMiddleware<HandlerDefinitions>>) => void;
-    useFeatureFlagMiddleware: (...props: Parameters<typeof createFeatureFlagMiddleware<'query', HandlerDefinitions>>) => void;
+    useFeatureFlagMiddleware: (
+        ...props: Parameters<typeof createFeatureFlagMiddleware<'query', HandlerDefinitions>>
+    ) => void;
     useMockerMiddleware: (...props: Parameters<typeof createMockerMiddleware<'query', HandlerDefinitions>>) => void;
 };
 export type QueryBus<HandlerDefinitions extends QueryMessageRegistryType> = Prettify<
@@ -115,7 +119,9 @@ type MissiveEventBus<HandlerDefinitions extends EventMessageRegistryType> = Repl
     useRetryerMiddleware: (...props: Parameters<typeof createRetryerMiddleware<'event', HandlerDefinitions>>) => void;
     useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'event', HandlerDefinitions>>) => void;
     useLockMiddleware: (...props: Parameters<typeof createLockMiddleware<'event', HandlerDefinitions>>) => void;
-    useFeatureFlagMiddleware: (...props: Parameters<typeof createFeatureFlagMiddleware<'event', HandlerDefinitions>>) => void;
+    useFeatureFlagMiddleware: (
+        ...props: Parameters<typeof createFeatureFlagMiddleware<'event', HandlerDefinitions>>
+    ) => void;
     useMockerMiddleware: (...props: Parameters<typeof createMockerMiddleware<'event', HandlerDefinitions>>) => void;
 };
 export type EventBus<HandlerDefinitions extends EventMessageRegistryType> = Prettify<
@@ -128,12 +134,12 @@ type HandlerConfig<
     MessageName extends keyof HandlerDefinitions & string = keyof HandlerDefinitions & string,
 > = HandlerDefinitions[MessageName] extends infer Definitions
     ? Definitions extends Record<string, unknown>
-    ? {
-        messageName: MessageName;
-        schema: ZodSchema<Definitions[BusKind]>;
-        handler: MessageHandler<Definitions[BusKind], Definitions['result']>;
-    }
-    : never
+        ? {
+              messageName: MessageName;
+              schema: ZodSchema<Definitions[BusKind]>;
+              handler: MessageHandler<Definitions[BusKind], Definitions['result']>;
+          }
+        : never
     : never;
 
 const createBus = <BusKind extends BusKinds, HandlerDefinitions extends MessageRegistryType<BusKind>>(args?: {
@@ -281,7 +287,9 @@ export const createCommandBus = <HandlerDefinitions extends CommandMessageRegist
         useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'command', HandlerDefinitions>>) => {
             commandBus.use(createWebhookMiddleware(...props));
         },
-        useFeatureFlagMiddleware: (...props: Parameters<typeof createFeatureFlagMiddleware<'command', HandlerDefinitions>>) => {
+        useFeatureFlagMiddleware: (
+            ...props: Parameters<typeof createFeatureFlagMiddleware<'command', HandlerDefinitions>>
+        ) => {
             commandBus.use(createFeatureFlagMiddleware(...props));
         },
         useMockerMiddleware: (...props: Parameters<typeof createMockerMiddleware<'command', HandlerDefinitions>>) => {
@@ -316,7 +324,9 @@ export const createQueryBus = <HandlerDefinitions extends QueryMessageRegistryTy
         useCacherMiddleware: (...props: Parameters<typeof createCacherMiddleware<HandlerDefinitions>>) => {
             queryBus.use(createCacherMiddleware(...props));
         },
-        useFeatureFlagMiddleware: (...props: Parameters<typeof createFeatureFlagMiddleware<'query', HandlerDefinitions>>) => {
+        useFeatureFlagMiddleware: (
+            ...props: Parameters<typeof createFeatureFlagMiddleware<'query', HandlerDefinitions>>
+        ) => {
             queryBus.use(createFeatureFlagMiddleware(...props));
         },
         useMockerMiddleware: (...props: Parameters<typeof createMockerMiddleware<'query', HandlerDefinitions>>) => {
@@ -347,7 +357,9 @@ export const createEventBus = <HandlerDefinitions extends EventMessageRegistryTy
         useWebhookMiddleware: (...props: Parameters<typeof createWebhookMiddleware<'event', HandlerDefinitions>>) => {
             eventBus.use(createWebhookMiddleware(...props));
         },
-        useFeatureFlagMiddleware: (...props: Parameters<typeof createFeatureFlagMiddleware<'event', HandlerDefinitions>>) => {
+        useFeatureFlagMiddleware: (
+            ...props: Parameters<typeof createFeatureFlagMiddleware<'event', HandlerDefinitions>>
+        ) => {
             eventBus.use(createFeatureFlagMiddleware(...props));
         },
         useMockerMiddleware: (...props: Parameters<typeof createMockerMiddleware<'event', HandlerDefinitions>>) => {

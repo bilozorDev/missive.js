@@ -4,9 +4,14 @@ import { Middleware } from '../core/middleware.js';
 
 type Options<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>> = {
     intents: {
-        [K in keyof T]?: (envelope: Envelope<TypedMessage<MessageRegistry<BusKind, T>>>) => Promise<T[K]['result']>;
+        [K in keyof T]?: (envelope: NarrowedEnvelope<BusKind, T, K>) => Promise<T[K]['result']>;
     };
 };
+
+type NarrowedEnvelope<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>, K extends keyof T> = Envelope<
+    TypedMessage<MessageRegistry<BusKind, Pick<T, K>>>
+>;
+
 export function createMockerMiddleware<BusKind extends BusKinds, T extends MessageRegistryType<BusKind>>({
     intents,
 }: Options<BusKind, T>): Middleware<BusKind, T> {
@@ -17,6 +22,7 @@ export function createMockerMiddleware<BusKind extends BusKinds, T extends Messa
             const result = await handler(envelope);
             envelope.addStamp<HandledStamp<T[typeof type]['result']>>('missive:handled', result);
         }
+
         await next();
     };
 }
