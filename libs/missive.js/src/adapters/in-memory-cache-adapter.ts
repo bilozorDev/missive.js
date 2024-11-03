@@ -1,6 +1,6 @@
 import { CacherAdapter } from '../middlewares/cacher-middleware.js';
 
-export const createMemoryCacheAdapter = (): CacherAdapter => {
+export function createMemoryCacheAdapter(): CacherAdapter {
     const memory = new Map<string, { value: unknown; expiresAt: number }>();
     return {
         get: async (key) => {
@@ -16,4 +16,4 @@ export const createMemoryCacheAdapter = (): CacherAdapter => {
             memory.set(key, { value, expiresAt });
         },
     };
-};
+}

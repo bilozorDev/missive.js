@@ -16,7 +16,7 @@ export type Stamp<C = unknown, T extends string = string> = {
 export type IdentityStamp = Stamp<{ id: string }, 'missive:identity'>;
 export type HandledStamp<R> = Stamp<R, 'missive:handled'>;
 
-export const createEnvelope = <T>(message: T): Envelope<T> => {
+export function createEnvelope<T>(message: T): Envelope<T> {
     const stamps: Stamp[] = [];
     return {
         stamps,
@@ -34,4 +34,4 @@ export const createEnvelope = <T>(message: T): Envelope<T> => {
             return [...stamps].reverse().find((stamp) => stamp.type === type) as S;
         },
     };
-};
+}

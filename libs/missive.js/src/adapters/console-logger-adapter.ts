@@ -4,7 +4,7 @@ type Deps = {
     logger: LoggerInterface;
     serializer?: (value: unknown) => string;
 };
-export const createLoggerAdapter = ({ logger, serializer = JSON.stringify }: Deps) => {
+export function createLoggerAdapter({ logger, serializer = JSON.stringify }: Deps) {
     const adapter: LoggerAdapter = {
         processing: (identity, message, results, stamps) =>
             logger.log(
@@ -39,4 +39,4 @@ export const createLoggerAdapter = ({ logger, serializer = JSON.stringify }: Dep
         },
     };
     return adapter;
-};
+}

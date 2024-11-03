@@ -267,10 +267,10 @@ const createBus = <BusKind extends BusKinds, HandlerDefinitions extends MessageR
     };
 };
 
-export const createCommandBus = <HandlerDefinitions extends CommandMessageRegistryType>(args?: {
+export function createCommandBus<HandlerDefinitions extends CommandMessageRegistryType>(args?: {
     middlewares?: Middleware<'command', HandlerDefinitions>[];
     handlers?: HandlerConfig<'command', HandlerDefinitions>[];
-}): MissiveCommandBus<HandlerDefinitions> => {
+}): MissiveCommandBus<HandlerDefinitions> {
     const commandBus = createBus<'command', HandlerDefinitions>(args);
 
     return {
@@ -299,12 +299,12 @@ export const createCommandBus = <HandlerDefinitions extends CommandMessageRegist
         dispatch: commandBus.dispatch,
         createCommand: commandBus.createIntent,
     };
-};
+}
 
-export const createQueryBus = <HandlerDefinitions extends QueryMessageRegistryType>(args?: {
+export function createQueryBus<HandlerDefinitions extends QueryMessageRegistryType>(args?: {
     middlewares?: Middleware<'query', HandlerDefinitions>[];
     handlers?: HandlerConfig<'query', HandlerDefinitions>[];
-}): MissiveQueryBus<HandlerDefinitions> => {
+}): MissiveQueryBus<HandlerDefinitions> {
     const queryBus = createBus<'query', HandlerDefinitions>(args);
 
     return {
@@ -336,12 +336,12 @@ export const createQueryBus = <HandlerDefinitions extends QueryMessageRegistryTy
         dispatch: queryBus.dispatch,
         createQuery: queryBus.createIntent,
     };
-};
+}
 
-export const createEventBus = <HandlerDefinitions extends EventMessageRegistryType>(args?: {
+export function createEventBus<HandlerDefinitions extends EventMessageRegistryType>(args?: {
     middlewares?: Middleware<'event', HandlerDefinitions>[];
     handlers?: HandlerConfig<'event', HandlerDefinitions>[];
-}): MissiveEventBus<HandlerDefinitions> => {
+}): MissiveEventBus<HandlerDefinitions> {
     const eventBus = createBus<'event', HandlerDefinitions>(args);
     return {
         use: (middleware: Middleware<'event', HandlerDefinitions>) => eventBus.use(middleware),
@@ -369,4 +369,4 @@ export const createEventBus = <HandlerDefinitions extends EventMessageRegistryTy
         dispatch: eventBus.dispatch,
         createEvent: eventBus.createIntent,
     };
-};
+}

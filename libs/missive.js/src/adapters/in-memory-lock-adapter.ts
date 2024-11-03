@@ -4,7 +4,7 @@ type LockerInfo = {
     expiresAt: number;
 };
 
-export const createInMemoryLockAdapter = (): LockAdapter => {
+export function createInMemoryLockAdapter(): LockAdapter {
     const store: Map<string, LockerInfo> = new Map();
 
     return {
@@ -23,4 +23,4 @@ export const createInMemoryLockAdapter = (): LockAdapter => {
             store.delete(key);
         },
     };
-};
+}
