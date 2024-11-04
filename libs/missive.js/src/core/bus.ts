@@ -70,12 +70,14 @@ type MissiveBus<BusKind extends BusKinds, HandlerDefinitions extends MessageRegi
         ): Promise<{
             envelope: Envelope<HandlerDefinitions[MessageName][BusKind]>;
             result: HandlerDefinitions[MessageName]['result'] | undefined;
+            results: (HandlerDefinitions[MessageName]['result'] | undefined)[];
         }>;
         <MessageName extends keyof HandlerDefinitions & string>(
             envelope: Envelope<TypedMessage<HandlerDefinitions[MessageName][BusKind], MessageName>>,
         ): Promise<{
             envelope: Envelope<HandlerDefinitions[MessageName][BusKind]>;
             result: HandlerDefinitions[MessageName]['result'] | undefined;
+            results: (HandlerDefinitions[MessageName]['result'] | undefined)[];
         }>;
     };
     createIntent: <MessageName extends keyof HandlerDefinitions & string>(
