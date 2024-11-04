@@ -50,6 +50,7 @@ We love clean architecture and CQRS, we didn't find any simple Service Bus that 
         [Lock](/missive.js/built-in-middlewares/lock), 
         [FeatureFlag](/missive.js/built-in-middlewares/feature-flag), 
         [Mock](/missive.js/built-in-middlewares/mocker), 
+        [Async](/missive.js/built-in-middlewares/async), 
         or [Webhook](/missive.js/built-in-middlewares/webhook).
     </Card>
     <Card title="Envelopes and Stamps" icon="email">
@@ -147,9 +148,8 @@ That's the power of Missive.js! Here are the built-in middlewares:
     </Card>
 
     <Card title="Async Middleware" icon="seti:nunjucks">
-        <p>You can already do async if you don't _await_ in your handler, but this is next level. Push the intent to a queue and handle it asynchronously.</p>
-        <p>Missive.js will provide the consumer which is going to be smart enough to handle the async processing.</p>
-        <LinkButton href={'/missive.js/contributing'} variant="secondary" class="float-right" ><Badge text='coming soon' variant='caution'/></LinkButton>
+        <p>You can already do async if you don't _await_ in your handler, but this is next level to defer handling to a consumer. Push the intent to a queue and handle it asynchronously.</p>
+        <LinkButton href={'/missive.js/built-in-middlewares/async'} variant="secondary" class="float-right" title={"Read the doc about the Async Middleware"}>Read the doc</LinkButton>
     </Card>
     
 </CardGrid>

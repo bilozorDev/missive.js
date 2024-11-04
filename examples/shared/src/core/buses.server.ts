@@ -83,20 +83,20 @@ const commandBus: CommandBus = createCommandBus<CommandHandlerRegistry>({
         { messageName: 'removeUser', schema: removeUserCommandSchema, handler: createRemoveUserHandler({}) },
     ],
 });
-commandBus.useMockerMiddleware({
-    intents: {
-        createUser: async (envelope) => ({
-            success: true,
-            userId: '1234',
-        }),
-        removeUser: async (envelope) => {
-            return {
-                success: true,
-                removeCount: 42,
-            };
-        },
-    },
-});
+// commandBus.useMockerMiddleware({
+//     intents: {
+//         createUser: async (envelope) => ({
+//             success: true,
+//             userId: '1234',
+//         }),
+//         removeUser: async (envelope) => {
+//             return {
+//                 success: true,
+//                 removeCount: 42,
+//             };
+//         },
+//     },
+// });
 commandBus.useLockMiddleware({
     adapter: {
         acquire: async () => true,
@@ -110,6 +110,22 @@ commandBus.useLockMiddleware({
             timeout: 2000,
             ttl: 500,
             tick: 100,
+        },
+    },
+});
+
+commandBus.useAsyncMiddleware({
+    consume: false,
+    produce: async (envelope) => {
+        console.log('Generic Push to Queue', envelope);
+    },
+    async: false,
+    intents: {
+        createUser: {
+            async: true,
+            produce: async (envelope) => {
+                console.log('createUser Push to Queue', envelope);
+            },
         },
     },
 });

@@ -1,0 +1,107 @@
+---
+title: Async Middleware
+description: Built-in middleware to defer handling to a consumer.
+---
+
+import { Icon, Aside, Steps } from '@astrojs/starlight/components';
+
+The Async Middleware is built-in middleware that gives you capability to defer the handling to an consumer to achieve real asynchronousity.
+It's only available for _CommandBus_ and _EventBus_
+
+## How to use it
+
+As for any Middleware, you can use it by adding it to the `bus` instance.
+
+```typescript
+const commandBus = createCommandBus<CommandHandlerRegistry>();
+commandBus.useAsyncMiddleware({
+    consume: false, // KEY POINT
+    produce: async (envelope) => {
+        // use your favorite queue system here
+        console.log('Generic Push to Queue', envelope);
+    },
+    async: true,// default is true
+    intents: {
+        createUser: {
+            async: true,
+            produce: async (envelope) => {
+                // use your favorite queue system here
+                console.log('createUser Push to Queue', envelope);
+            },
+        },
+    },
+});
+```
+
+> Remember built-in middlewares are _intent_ aware, therefore you can customize the behavior per intent using the key `intents`.
+
+Next, you need to have a consumer that will consume it. The way to do that with Missive.js is to create another bus with this middlware with `consume: true`.
+
+```typescript
+commandBus.useAsyncMiddleware({
+    consume: true, // KEY POINT
+});
+```
+
+The worker script that consumes the queue can dispatch the message it receives directly to the dispatch method:
+
+```typescript
+// Consumer script
+onMessage: async (message) => {
+    const envelope = JSON.parse(message);
+    await commandBus.dispatch(intent);
+}
+```
+<Aside title="Gotchas" type="note">
+Generally, the `dispatch` receives an `intent` but it can also receive an `envelope`. In this case, the `envelope` is the message received from the queue.
+</Aside>
+
+### Explanation
+
+The flow is the following:
+
+<Steps>
+
+1. Your application (web node for instance) will have a bus on which this middleware is added with `consume: false`. 
+
+2. When you dispatch an intent, the middleware will push the intent to the queue system (via the `produce` method that you provide) instead of handling it.
+
+3. You have another application (worker node for instance) that will have a bus on which this middleware is added with `consume: true`.
+
+4. This worker will consume the intent from the queue system and handle it.
+
+</Steps>
+
+<Aside title="Important things to remember" type="caution">
+- `intent` will pass through the bus twice, once for the `produce` and once for the `consume`, so make sure your middleware have no side effects.
+- Async Middleware breaks sthe chain of middlewares and for this reason, it is usually register the last.
+</Aside>
+
+<Aside title="Gotchas" type="tip">
+When you dispatch an `envelope` to the `bus`, the bus will save the `envelope` original `stamps` in the `ReprocessedStamp` stamp.
+This way, the bus that consumes the `envelope` can have access to the original `stamps`.
+</Aside>
+
+
+## Added Stamps 
+
+The Async Middleware is going to add:
+
+    -     
+        ```typescript
+        type AsyncStamp = Stamp<undefined, 'missive:async'>;
+        ```
+        > When the intent is pushed to the queue.
+
+    -     
+        ```typescript
+        type ReprocessedStamp = Stamp<{ stamps: Stamp[] }, 'missive:reprocessed'>;
+        ```
+        > When the envelope is dispatched.
+
+## Going further
+
+<div class='flex flex-row'>
+    <span className='pr-2'>Look at the code of the </span>
+    <a href="https://github.com/Missive-js/missive.js/tree/main/libs/missive.js/src/middlewares/async-middleware.ts" class="contents" target="_blank"><Icon name="github" class="mr-2"/>Async Middleware</a>
+</div>

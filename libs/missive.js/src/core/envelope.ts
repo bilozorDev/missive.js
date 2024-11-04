@@ -14,6 +14,7 @@ export type Stamp<C = unknown, T extends string = string> = {
 };
 
 export type IdentityStamp = Stamp<{ id: string }, 'missive:identity'>;
+export type ReprocessedStamp = Stamp<{ stamps: Stamp[] }, 'missive:reprocessed'>;
 export type HandledStamp<R> = Stamp<R, 'missive:handled'>;
 
 export function createEnvelope<T>(message: T): Envelope<T> {

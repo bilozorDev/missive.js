@@ -42,7 +42,7 @@ export function createCacherMiddleware<T extends QueryMessageRegistryType>({
         adapter = createMemoryCacheAdapter();
     }
     return async (envelope, next) => {
-        const type = envelope.message.__type;
+        const type = envelope.message.__type as keyof T;
         const key = await hashKey(JSON.stringify(envelope.message));
         const cached = await adapter.get(key);
         if (cached) {

@@ -8,6 +8,19 @@ const github = 'https://github.com/missive-js/missive.js';
 const githubURL = new URL(github);
 const githubPathParts = githubURL.pathname.split('/');
 const title = 'Missive.js';
+
+const stamps = [
+    'IdentityStamp',
+    'HandledStamp',
+    'ReprocessedStamp',
+    'AsyncStamp',
+    'FromCacheStamp',
+    'FeatureFlagFallbackStamp',
+    'TimingsStamp',
+    'RetriedStamp',
+    'WebhookCalledStamp',
+];
+
 export default defineConfig({
     site: `https://${githubPathParts[1]}.github.io/${githubPathParts[2]}`,
     base: `${githubPathParts[2]}`,
@@ -58,6 +71,14 @@ export default defineConfig({
                 {
                     label: 'Built-in Middlewares',
                     autogenerate: { directory: 'built-in-middlewares' },
+                },
+                {
+                    label: 'Built-in Stamps',
+                    collapsed: true,
+                    items: stamps.map((stamp) => ({
+                        label: stamp,
+                        link: `built-in-stamps#${stamp.toLowerCase()}`,
+                    })),
                 },
                 {
                     label: 'Contributing',

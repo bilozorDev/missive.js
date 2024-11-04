@@ -1,4 +1,3 @@
-import { stat } from 'fs';
 import { Envelope, QueryHandlerDefinition } from 'missive.js';
 import { CacheableStamp } from 'missive.js';
 import { z } from 'zod';

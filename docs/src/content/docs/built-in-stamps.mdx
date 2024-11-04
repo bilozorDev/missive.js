@@ -1,0 +1,106 @@
+---
+title: Built-in Stamps
+description: All the built-in Stamps that Missive.js provides.
+---
+
+import { Aside  } from '@astrojs/starlight/components';
+
+
+This page lists all the built-in Stamps that Missive.js provides. 
+Stamps are a way to handle cross-cutting concerns in your application. They are key to keeping your code clean and maintainable. 
+Most of all, they are easy to write and use, and they can be generic!
+
+## Added by the Bus
+
+### IdentityStamp
+
+```typescript
+type AsyncStamp = Stamp<undefined, 'missive:async'>;
+```
+Added on `bus.dispatch(intent|envelope)`.
+
+<Aside title="Dispatching an envelope" type="note">
+If an `envelope` is dispatched, the original `IdentityStamp` will be preserved.
+</Aside>
+
+### HandledStamp
+
+```typescript
+type HandledStamp<R> = Stamp<R, 'missive:handled'>;
+```
+Added when the intent is handled by the handler.
+
+<Aside title="More than one handler" type="tip">
+The `HandledStamp` will be added by each handler.
+</Aside>
+
+<Aside title="Conditional handling" type="caution">
+If a Middleware adds this stamp, the bus will not run the handler.
+</Aside>
+
+
+### ReprocessedStamp
+
+```typescript
+type ReprocessedStamp = Stamp<{ stamps: Stamp[] }, 'missive:reprocessed'>;
+```
+
+Added when the `envelope` is dispatched through the bus instead of an `intent`. When this happens, 
+the bus will save the original `stamps` in the `ReprocessedStamp` stamp.
+
+
+## Added by the Middlewares
+
+### AsyncStamp
+
+```typescript
+type AsyncStamp = Stamp<undefined, 'missive:async'>;
+```
+
+Added when the envelope is sent to a queue via the [Async middleware](/missive.js/built-in-middlewares/async).
+
+### FromCacheStamp
+
+```typescript
+type FromCacheStamp = Stamp<undefined, 'missive:cache:hit'>;
+```
+
+Added when the [Cacher middleware](/missive.js/built-in-middlewares/cacher) finds the result in the cache.
+
+### FeatureFlagFallbackStamp
+
+```typescript
+type FeatureFlagFallbackStamp = Stamp<undefined, 'missive:feature-flag-fallback'>;
+```
+
+When the [Feature Flag Middleware](/missive.js/built-in-middlewares/feature-flag) uses a fallbackHandler.
+
+### TimingsStamp
+
+ ```typescript
+type TimingsStamp = Stamp<{ total: number }, 'missive:timings'>
+```
+
+Add by the [Logger middleware](/missive.js/built-in-middlewares/logger) when the message is handled or errored with the total time elapsed in nanoseconds.
+
+### RetriedStamp
+
+```typescript
+type RetriedStamp = Stamp<{ attempt: number; errorMessage: string }, 'missive:retried'>;
+```
+
+Added by the [Retryer middleware](/missive.js/built-in-middlewares/retryer) when the middleware retries the handling of the intent.
+<Aside title="More than one retry" type="tip">
+You will get more than one Stamp!
+</Aside>
+
+
+### WebhookCalledStamp
+    
+```typescript
+type WebhookCalledStamp = Stamp<{ attempt: number; text?: string, status?: number }, 'missive:webhook-called'>;
+```
+
+Add by the [Webhook middleware](/missive.js/built-in-middlewares/webhook) when the middleware succeed to call the webhook(s) or ultimately at the end of the retries.
+
+
