@@ -4,8 +4,19 @@ import Default from '@astrojs/starlight/components/SocialIcons.astro';
 ---
 
 <img
+    alt="Missive.js - GitHub Repo stars"
+    src="https://img.shields.io/github/stars/missive-js/missive.js?style=flat&logo=github&color=yellow&textColor=black"
+/>
+<img alt="NPM Downloads" src="https://img.shields.io/npm/d18m/missive.js?logo=npm&color=lightblue" />
+<img
+    alt="Missive.js Version"
+    src="https://img.shields.io/npm/v/missive.js?color=violet&logo=npm"
+    height="20"
+    loading="lazy"
+/>
+<img
     src="https://github.com/missive-js/missive.js/actions/workflows/main-ci.yaml/badge.svg?branch=main"
-    alt="Missive.js Main Build Status"
+    alt="Missive.js - Main Build Status"
     height="20"
     loading="lazy"
 />
@@ -16,8 +27,6 @@ import Default from '@astrojs/starlight/components/SocialIcons.astro';
     height="20"
     loading="lazy"
 />
-
-<img alt="Missive.js Version" src="https://img.shields.io/npm/v/missive.js?color=violet" height="20" loading="lazy" />
 
 <Default {...Astro.props}>
     <slot />
